@@ -24,7 +24,7 @@ struct MenuBarPanelView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("FinalRound Lite")
                     .font(.headline)
-                Text(model.status.rawValue.capitalized)
+                Text(model.status.displayText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -47,6 +47,13 @@ struct MenuBarPanelView: View {
                     model.isListening ? model.stop() : model.start()
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(model.status == .analyzing)
+
+                Button("Importar audio") {
+                    model.importAudioAndAnalyze()
+                }
+                .buttonStyle(.bordered)
+                .disabled(model.status == .analyzing || model.isListening)
 
                 Button("Copiar Markdown") {
                     Clipboard.copy(model.exportMarkdown())
@@ -62,6 +69,22 @@ struct MenuBarPanelView: View {
                     }
                 }
                 .buttonStyle(.bordered)
+
+                Button("Limpiar") {
+                    model.clearSessionOutput()
+                }
+                .buttonStyle(.bordered)
+                .disabled(!model.hasSessionOutput)
+            }
+
+            if model.status == .analyzing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Analizando audio importado…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             if !model.hasAPIKey {
