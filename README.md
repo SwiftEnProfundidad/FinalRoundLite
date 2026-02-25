@@ -38,6 +38,13 @@ bash scripts/release_local.sh
 
 `scripts/release_local.sh` es el comando canonico de validacion local: ejecuta tests completos, build release y smoke automatizado con verificacion de evidencia.
 
+Para visibilidad operativa de evidencia del ultimo run:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_gate_status.sh
+```
+
 ## Uso
 
 1. Abre `Settings` y pega tu `OPENAI_API_KEY`.

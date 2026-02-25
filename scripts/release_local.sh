@@ -50,3 +50,6 @@ fi
 
 echo "RELEASE_LOCAL_GATE_OK"
 echo " - gate evidence: $GATE_EVIDENCE_FILE"
+
+echo "[P3.4] Verificacion de visibilidad de evidencia"
+bash "$ROOT_DIR/scripts/release_gate_status.sh"

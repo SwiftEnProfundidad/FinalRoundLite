@@ -51,18 +51,26 @@ Ultima actualizacion: 2026-02-25
   - falla si la evidencia de smoke no corresponde al commit actual.
 - `✅` Evidencia automatizada de gate local (ultimo run):
   - archivo: `build/smoke/release_local_gate.txt`
-  - `run_at_utc=2026-02-25T11:40:32Z`
-  - `commit=9103ad3`
+  - `run_at_utc=2026-02-25T14:30:38Z`
+  - `commit=22d19c5`
   - `swift_test=SWIFT_TEST_OK`
   - `build_app=BUILD_APP_OK`
   - `qa_smoke=QA_SMOKE_OK`
   - `canonical_command=bash scripts/release_local.sh`
 - `✅` Evidencia de smoke enlazada por gate (ultimo run):
   - archivo: `build/smoke/qa_smoke_last_run.txt`
-  - `run_at_utc=2026-02-25T11:40:39Z`
+  - `run_at_utc=2026-02-25T14:30:45Z`
   - `smoke_start_stop=SMOKE_START_STOP_OK`
   - `smoke_import_export=SMOKE_IMPORT_EXPORT_OK`
   - logs: `build/smoke/smoke_launch.log` y `build/smoke/smoke_tests.log`
+
+## 7) Visibilidad operativa de evidencia (P3.4)
+- `✅` Comando dedicado de lectura y validacion de evidencia:
+  - comando: `bash scripts/release_gate_status.sh`
+  - valida que gate/smoke existan, esten en `OK` y correspondan al commit actual.
+  - salida esperada: `RELEASE_EVIDENCE_STATUS_OK`.
+- `✅` Integrado en el gate canonico:
+  - `scripts/release_local.sh` ejecuta `scripts/release_gate_status.sh` al final.
 
 ## Estado actual
 - `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.

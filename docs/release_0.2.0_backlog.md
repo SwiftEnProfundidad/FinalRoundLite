@@ -50,9 +50,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P3.3` Endurecimiento del gate local de entrega:
   - comando unico de validacion (`release_local.sh`) documentado como entrada estandar de release local.
   - checklist alineada con evidencia automatizada y comando canonico.
-- `🚧` `P3.4` Endurecimiento operativo del ciclo local:
+- `✅` `P3.4` Endurecimiento operativo del ciclo local:
   - consolidar `release_local.sh` como paso previo obligatorio antes de cierre de release local.
   - mantener visibilidad de evidencia de gate y smoke en documentacion operativa.
+- `🚧` `P3.5` Operativa de cierre de release local:
+  - estandarizar checklist final de cierre usando `release_local.sh` + `release_gate_status.sh`.
+  - documentar ruta minima de comandos para validacion final previa a entrega.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
