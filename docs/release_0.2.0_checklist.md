@@ -72,5 +72,21 @@ Ultima actualizacion: 2026-02-25
 - `✅` Integrado en el gate canonico:
   - `scripts/release_local.sh` ejecuta `scripts/release_gate_status.sh` al final.
 
+## 8) Operativa final de cierre local (P3.5)
+- `✅` Ruta minima canonica previa a entrega:
+  - `bash scripts/release_local.sh`
+  - `bash scripts/release_gate_status.sh`
+- `✅` Checklist final estandarizado:
+  - comando: `bash scripts/release_close_checklist.sh`
+  - resultado esperado: `RELEASE_CLOSE_CHECKLIST_OK`.
+  - evidencia resumen: `build/smoke/release_close_checklist.txt`.
+- `✅` Ultimo resumen de cierre generado:
+  - `release_close_checklist=OK`
+  - `head_commit=b4c5281`
+  - `gate_run_at_utc=2026-02-25T20:54:28Z`
+  - `smoke_run_at_utc=2026-02-25T20:54:36Z`
+  - `step_1_release_local=bash scripts/release_local.sh`
+  - `step_2_release_gate_status=bash scripts/release_gate_status.sh`
+
 ## Estado actual
 - `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.

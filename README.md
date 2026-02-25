@@ -45,6 +45,23 @@ cd Developer/Projects/FinalRoundLite
 bash scripts/release_gate_status.sh
 ```
 
+## Cierre Final de Release Local
+
+Ruta minima de validacion final previa a entrega:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_local.sh
+bash scripts/release_gate_status.sh
+```
+
+Ejecucion estandarizada de checklist final de cierre:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_close_checklist.sh
+```
+
 ## Uso
 
 1. Abre `Settings` y pega tu `OPENAI_API_KEY`.
