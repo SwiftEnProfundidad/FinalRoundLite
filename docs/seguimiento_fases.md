@@ -1,6 +1,6 @@
 # Seguimiento por fases
 
-Ultima actualizacion: 2026-02-24
+Ultima actualizacion: 2026-02-25
 
 ## Leyenda
 - `✅ Hecho`
@@ -14,6 +14,8 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Crear `AGENTS.md` local del repo.
 - `✅` Crear tracking por fases con leyenda y estados.
 - `✅` Inicializar repo Git local y commit inicial del proyecto.
+- `✅` Endurecer `AGENTS.md` como contrato hard de skills por ambito y GitFlow/ramas nombradas.
+- `✅` Vendorizar skills hard en `docs/codex-skills/*.md` y script de sincronizacion reproducible.
 
 ## Fase 1 - Base de producto (MVP local)
 - `✅` Menubar app SwiftUI con panel de control.
@@ -38,4 +40,3 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `⏳` Modo post-sesion (importar audio y analizar sin captura en vivo).
 - `⏳` Persistencia local opcional de sesiones (desactivada por defecto).
 - `⏳` Definir backlog priorizado para release `0.2.0`.
-
