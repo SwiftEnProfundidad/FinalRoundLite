@@ -16,24 +16,24 @@ final class AppCoordinator {
         await stop(emitEvent: false, onEvent: onEvent)
 
         guard let apiKey, !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            await onEvent(.error("Falta API key. Ve a Settings y pega tu OPENAI_API_KEY."))
-            await onEvent(.stopped)
+            onEvent(.error("Falta API key. Ve a Settings y pega tu OPENAI_API_KEY."))
+            onEvent(.stopped)
             return
         }
 
-        let settings = await settingsProvider()
+        let settings = settingsProvider()
         guard settings.sendAudioToOpenAI else {
-            await onEvent(.error("Activa 'Enviar audio a OpenAI' para empezar a transcribir."))
-            await onEvent(.stopped)
+            onEvent(.error("Activa 'Enviar audio a OpenAI' para empezar a transcribir."))
+            onEvent(.stopped)
             return
         }
 
-        await onEvent(.statusChanged(.starting))
+        onEvent(.statusChanged(.starting))
 
         do {
             let stream = try audioCapture.start()
-            await onEvent(.started)
-            await onEvent(.statusChanged(.listening))
+            onEvent(.started)
+            onEvent(.statusChanged(.listening))
             await pipeline.start(
                 stream: stream,
                 apiKey: apiKey,
@@ -42,9 +42,36 @@ final class AppCoordinator {
                 onEvent: onEvent
             )
         } catch {
-            await onEvent(.error("No se pudo iniciar el microfono. Revisa permisos de microfono en macOS."))
-            await onEvent(.stopped)
+            onEvent(.error("No se pudo iniciar el microfono. Revisa permisos de microfono en macOS."))
+            onEvent(.stopped)
         }
+    }
+
+    func analyzeImportedAudio(
+        fileURL: URL,
+        apiKey: String?,
+        settingsProvider: @escaping @Sendable @MainActor () -> RuntimeSettings,
+        contextProvider: @escaping @Sendable @MainActor () -> ContextCard,
+        onEvent: @escaping @Sendable @MainActor (CoordinatorEvent) -> Void
+    ) async {
+        self.onEvent = onEvent
+        await stop(emitEvent: false, onEvent: onEvent)
+
+        guard let apiKey, !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            onEvent(.error("Falta API key. Ve a Settings y pega tu OPENAI_API_KEY."))
+            onEvent(.stopped)
+            return
+        }
+
+        onEvent(.statusChanged(.starting))
+        onEvent(.statusChanged(.analyzing))
+        await pipeline.analyzeImportedAudio(
+            fileURL: fileURL,
+            apiKey: apiKey,
+            settingsProvider: settingsProvider,
+            contextProvider: contextProvider,
+            onEvent: onEvent
+        )
     }
 
     func stop() async {
@@ -56,8 +83,8 @@ final class AppCoordinator {
         await pipeline.stop()
 
         if emitEvent, let onEvent {
-            await onEvent(.stopped)
-            await onEvent(.statusChanged(.idle))
+            onEvent(.stopped)
+            onEvent(.statusChanged(.idle))
         }
     }
 }
@@ -74,7 +101,6 @@ private struct TranscriptBuffer: Sendable {
     mutating func append(_ segment: String) {
         if !text.isEmpty { text += "\n" }
         text += segment
-        // Keep buffer bounded.
         if text.count > 10_000 {
             text = String(text.suffix(10_000))
         }
@@ -212,6 +238,22 @@ private actor PipelineWorker {
         }
     }
 
+    func analyzeImportedAudio(
+        fileURL: URL,
+        apiKey: String,
+        settingsProvider: @escaping @Sendable @MainActor () -> RuntimeSettings,
+        contextProvider: @escaping @Sendable @MainActor () -> ContextCard,
+        onEvent: @escaping @Sendable @MainActor (CoordinatorEvent) -> Void
+    ) async {
+        await stop()
+        self.apiKey = apiKey
+        self.settingsProvider = settingsProvider
+        self.contextProvider = contextProvider
+        self.onEvent = onEvent
+
+        await runImportedAudio(fileURL: fileURL)
+    }
+
     func stop() async {
         runTask?.cancel()
         runTask = nil
@@ -270,11 +312,50 @@ private actor PipelineWorker {
         await onEvent(.statusChanged(.idle))
     }
 
+    private func runImportedAudio(fileURL: URL) async {
+        guard let onEvent, let settingsProvider, let contextProvider, let apiKey else { return }
+        let client = OpenAIClient(apiKey: apiKey)
+
+        do {
+            let settings = await settingsProvider()
+            let preflight = try ImportedAudioPreflight.validate(fileURL: fileURL)
+            let data = try Data(contentsOf: fileURL, options: [.mappedIfSafe])
+            let text = try await client.createTranscription(
+                audioData: data,
+                filename: preflight.filename,
+                contentType: preflight.contentType,
+                model: settings.transcriptionModel,
+                language: settings.languageCode
+            )
+
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else {
+                throw OpenAIClient.ClientError.missingOutputText
+            }
+
+            transcriptBuffer.append(trimmed)
+            await onEvent(.transcriptAppended(trimmed))
+
+            let context = await contextProvider()
+            let input = CoachInput(
+                context: context,
+                transcript: transcriptBuffer.window(maxChars: 4000),
+                previousQuestion: lastKnownQuestion
+            )
+            if let suggestion = try await buildCoachSuggestion(client: client, settings: settings, input: input) {
+                await onEvent(.suggestionUpdated(suggestion))
+            }
+        } catch {
+            await onEvent(.error(ImportedAudioErrorPresenter.message(for: error)))
+        }
+
+        await onEvent(.stopped)
+        await onEvent(.statusChanged(.idle))
+    }
+
     private func scheduleCoachUpdateIfNeeded(settings: RuntimeSettings, client: OpenAIClient) async {
-        let throttleSeconds: TimeInterval = settings.lowCostMode ? 15 : 8
         let now = Date()
-        let elapsed = lastCoachCallAt.map { now.timeIntervalSince($0) } ?? .infinity
-        let delay = max(0, throttleSeconds - elapsed)
+        let delay = CoachThrottle.delay(lastCoachCallAt: lastCoachCallAt, now: now, lowCostMode: settings.lowCostMode)
 
         guard scheduledCoachTask == nil else { return }
         scheduledCoachTask = Task { [weak self] in
@@ -291,40 +372,45 @@ private actor PipelineWorker {
         guard let onEvent, let settingsProvider else { return }
 
         let settings = await settingsProvider()
-        let model = settings.coachModel
         guard let input = pendingCoachInput else { return }
         pendingCoachInput = nil
 
         lastCoachCallAt = Date()
 
         do {
-            let schema = CoachOutput.schema
-            let systemPrompt = Prompts.systemDesignCoachSystemPrompt(languageCode: settings.languageCode)
-            let userPrompt = Prompts.systemDesignUserPrompt(input: input, languageCode: settings.languageCode)
-
-            let outputText = try await client.createCoachJSON(
-                systemPrompt: systemPrompt,
-                userPrompt: userPrompt,
-                model: model,
-                schema: schema,
-                maxOutputTokens: settings.lowCostMode ? 220 : 320
-            )
-
-            guard let jsonData = JSONExtractor.firstJSONObjectData(in: outputText) ?? outputText.data(using: .utf8) else {
-                return
+            if let suggestion = try await buildCoachSuggestion(client: client, settings: settings, input: input) {
+                await onEvent(.suggestionUpdated(suggestion))
             }
-
-            let decoded = try JSONDecoder().decode(CoachOutput.self, from: jsonData)
-            guard decoded.confidence >= 0.6, decoded.shouldUpdate else { return }
-
-            let fingerprint = "\(decoded.currentQuestion)|\(decoded.shortScript)|\(decoded.tradeoffs.joined(separator: ";"))"
-            guard fingerprint != lastSuggestionFingerprint else { return }
-            lastSuggestionFingerprint = fingerprint
-            lastKnownQuestion = decoded.currentQuestion
-
-            await onEvent(.suggestionUpdated(decoded.asSuggestion))
         } catch {
             await onEvent(.error("Coach fallo: \(error.localizedDescription)"))
         }
+    }
+
+    private func buildCoachSuggestion(client: OpenAIClient, settings: RuntimeSettings, input: CoachInput) async throws -> CoachSuggestion? {
+        let model = settings.coachModel
+        let schema = CoachOutput.schema
+        let systemPrompt = Prompts.systemDesignCoachSystemPrompt(languageCode: settings.languageCode)
+        let userPrompt = Prompts.systemDesignUserPrompt(input: input, languageCode: settings.languageCode)
+
+        let outputText = try await client.createCoachJSON(
+            systemPrompt: systemPrompt,
+            userPrompt: userPrompt,
+            model: model,
+            schema: schema,
+            maxOutputTokens: settings.lowCostMode ? 220 : 320
+        )
+
+        guard let jsonData = JSONExtractor.firstJSONObjectData(in: outputText) ?? outputText.data(using: .utf8) else {
+            return nil
+        }
+
+        let decoded = try JSONDecoder().decode(CoachOutput.self, from: jsonData)
+        guard decoded.confidence >= 0.6, decoded.shouldUpdate else { return nil }
+
+        let fingerprint = "\(decoded.currentQuestion)|\(decoded.shortScript)|\(decoded.tradeoffs.joined(separator: ";"))"
+        guard fingerprint != lastSuggestionFingerprint else { return nil }
+        lastSuggestionFingerprint = fingerprint
+        lastKnownQuestion = decoded.currentQuestion
+        return decoded.asSuggestion
     }
 }
