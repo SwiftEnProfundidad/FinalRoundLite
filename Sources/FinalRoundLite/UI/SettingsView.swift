@@ -119,6 +119,14 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Telemetria local") {
+                Text("Sesiones procesadas: \(model.telemetrySessionCount)")
+                Text(
+                    "Tiempo promedio de procesamiento: \(model.telemetryAverageProcessingSeconds, format: .number.precision(.fractionLength(2))) s"
+                )
+                .foregroundStyle(.secondary)
+            }
+
             Section("Context Card (System Design)") {
                 TextField("Problema", text: $model.contextCard.problem, axis: .vertical)
                 TextField("Usuarios", text: $model.contextCard.users, axis: .vertical)

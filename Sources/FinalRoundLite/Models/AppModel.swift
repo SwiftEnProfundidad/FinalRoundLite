@@ -33,6 +33,8 @@ final class AppModel {
     }
     var customSessionsDirectoryPath = ""
     var usesDefaultSessionsDirectory = true
+    var telemetrySessionCount = 0
+    var telemetryAverageProcessingSeconds = 0.0
     var savedSessions: [SavedSessionRecord] = []
     var isLoadingSavedSessions = false
     var languageCode = "es"
@@ -56,13 +58,16 @@ final class AppModel {
     private let keychain = KeychainStore()
     private let coordinator = AppCoordinator()
     private let sessionStore: any SessionPersisting
+    private let telemetryStore: any TelemetryPersisting
     private let persistenceSettingsStore: any SessionPersistenceSettingsStoring
     private let fileOpener: any FileOpening
     private var lastPersistedFingerprint: String?
     private var customSessionsDirectoryURL: URL?
+    private var sessionStartedAt: Date?
 
     init(
         sessionStore: (any SessionPersisting)? = nil,
+        telemetryStore: (any TelemetryPersisting)? = nil,
         fileOpener: any FileOpening = WorkspaceFileOpener(),
         persistenceSettingsStore: any SessionPersistenceSettingsStoring = UserDefaultsSessionPersistenceSettingsStore()
     ) {
@@ -83,11 +88,18 @@ final class AppModel {
         } else {
             self.sessionStore = SessionStore(baseDirectoryURL: customSessionsDirectoryURL)
         }
+        if let telemetryStore {
+            self.telemetryStore = telemetryStore
+        } else {
+            self.telemetryStore = LocalTelemetryStore()
+        }
 
         Task { [sessionStore = self.sessionStore, customSessionsDirectoryURL] in
             guard let configurable = sessionStore as? any SessionStoreConfiguring else { return }
             await configurable.setBaseDirectoryURL(customSessionsDirectoryURL)
         }
+
+        refreshTelemetrySnapshot()
     }
 
     func start() {
@@ -275,12 +287,19 @@ final class AppModel {
         case .started:
             status = .listening
             errorMessage = nil
+            if sessionStartedAt == nil {
+                sessionStartedAt = .now
+            }
         case .stopped:
             status = .idle
             isListening = false
+            recordTelemetryIfNeeded()
             persistSessionIfNeeded()
         case let .statusChanged(newStatus):
             status = newStatus
+            if newStatus == .analyzing, sessionStartedAt == nil {
+                sessionStartedAt = .now
+            }
         case let .error(message):
             errorMessage = message
             status = .error
@@ -388,6 +407,48 @@ final class AppModel {
         return applicationSupportURL
             .appendingPathComponent("FinalRoundLite", isDirectory: true)
             .appendingPathComponent("sessions", isDirectory: true)
+    }
+
+    private func recordTelemetryIfNeeded() {
+        guard let sessionStartedAt else { return }
+        self.sessionStartedAt = nil
+
+        let transcriptTrimmed = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasSuggestion = !currentQuestion.isEmpty ||
+            !shortScript.isEmpty ||
+            !clarifyingQuestions.isEmpty ||
+            !tradeoffs.isEmpty ||
+            !nextSteps.isEmpty
+        guard !transcriptTrimmed.isEmpty || hasSuggestion else { return }
+
+        let processingSeconds = max(0, Date().timeIntervalSince(sessionStartedAt))
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.telemetryStore.recordSession(processingSeconds: processingSeconds)
+                let snapshot = try await self.telemetryStore.snapshot()
+                self.applyTelemetrySnapshot(snapshot)
+            } catch {
+                self.errorMessage = "No se pudo actualizar telemetria local: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func refreshTelemetrySnapshot() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let snapshot = try await self.telemetryStore.snapshot()
+                self.applyTelemetrySnapshot(snapshot)
+            } catch {
+                self.errorMessage = "No se pudo leer telemetria local: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func applyTelemetrySnapshot(_ snapshot: LocalTelemetrySnapshot) {
+        telemetrySessionCount = snapshot.sessionCount
+        telemetryAverageProcessingSeconds = snapshot.averageProcessingSeconds
     }
 }
 

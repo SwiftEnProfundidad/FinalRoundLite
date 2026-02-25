@@ -57,4 +57,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P1.1` Historial local minimo (listar sesiones guardadas y abrir JSON/Markdown desde la app).
 - `✅` Implementar `P1.2` mejoras de usabilidad (limpieza explicita y estado "analizando").
 - `✅` Implementar `P2.1` ajustes avanzados (carpeta de persistencia y retencion configurable).
-- `🚧` Implementar `P2.2` telemetria local no sensible (contador de sesiones y tiempo de procesamiento promedio).
+- `✅` Implementar `P2.2` telemetria local no sensible (contador de sesiones y tiempo de procesamiento promedio).
+- `🚧` Implementar `P2.3` eliminacion de `@preconcurrency` en `AudioCaptureService` con validacion en Swift 6.2 strict concurrency.

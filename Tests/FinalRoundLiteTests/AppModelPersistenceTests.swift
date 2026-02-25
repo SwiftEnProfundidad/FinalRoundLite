@@ -5,7 +5,8 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testConsumeStopped_persistsSessionWhenEnabled() async throws {
         let storeSpy = SessionStoreSpy()
-        let model = AppModel(sessionStore: storeSpy)
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
         model.persistSessionsLocally = true
         model.sessionRetentionLimit = 5
         model.transcript = "transcript de prueba"
@@ -25,7 +26,8 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testConsumeStopped_doesNotPersistWhenDisabled() async throws {
         let storeSpy = SessionStoreSpy()
-        let model = AppModel(sessionStore: storeSpy)
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
         model.persistSessionsLocally = false
         model.transcript = "transcript de prueba"
         model.currentQuestion = "pregunta actual"
@@ -40,7 +42,8 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testConsumeStopped_doesNotPersistDuplicateSession() async throws {
         let storeSpy = SessionStoreSpy()
-        let model = AppModel(sessionStore: storeSpy)
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
         model.persistSessionsLocally = true
         model.transcript = "transcript duplicado"
         model.currentQuestion = "pregunta duplicada"
@@ -57,8 +60,9 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testRefreshSavedSessions_loadsMostRecentSessions() async throws {
         let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
         let openerSpy = FileOpenerSpy()
-        let model = AppModel(sessionStore: storeSpy, fileOpener: openerSpy)
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy, fileOpener: openerSpy)
 
         let first = SavedSessionRecord(
             savedAt: Date(timeIntervalSince1970: 10),
@@ -82,7 +86,8 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testRefreshSavedSessions_usesRetentionLimitByDefault() async throws {
         let storeSpy = SessionStoreSpy()
-        let model = AppModel(sessionStore: storeSpy)
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
         model.sessionRetentionLimit = 3
 
         model.refreshSavedSessions()
@@ -95,6 +100,7 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testInit_appliesStoredCustomDirectoryToConfigurableSessionStore() async throws {
         let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
         let settingsSpy = SessionPersistenceSettingsStoreSpy(
             loadedSettings: SessionPersistenceSettings(
                 customDirectoryPath: "/tmp/finalround-lite-custom",
@@ -103,6 +109,7 @@ final class AppModelPersistenceTests: XCTestCase {
         )
         let model = AppModel(
             sessionStore: storeSpy,
+            telemetryStore: telemetrySpy,
             persistenceSettingsStore: settingsSpy
         )
 
@@ -119,8 +126,9 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testOpenSavedSessionActions_delegateToFileOpener() {
         let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
         let openerSpy = FileOpenerSpy()
-        let model = AppModel(sessionStore: storeSpy, fileOpener: openerSpy)
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy, fileOpener: openerSpy)
 
         let session = SavedSessionRecord(
             savedAt: Date(timeIntervalSince1970: 50),
@@ -139,8 +147,9 @@ final class AppModelPersistenceTests: XCTestCase {
     @MainActor
     func testOpenSavedSessionMarkdown_setsErrorWhenMissingMarkdown() {
         let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
         let openerSpy = FileOpenerSpy()
-        let model = AppModel(sessionStore: storeSpy, fileOpener: openerSpy)
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy, fileOpener: openerSpy)
 
         let session = SavedSessionRecord(
             savedAt: Date(timeIntervalSince1970: 50),
@@ -152,6 +161,25 @@ final class AppModelPersistenceTests: XCTestCase {
 
         XCTAssertEqual(model.errorMessage, "No hay archivo Markdown para esta sesion.")
         XCTAssertTrue(openerSpy.openedURLs.isEmpty)
+    }
+
+    @MainActor
+    func testConsumeStopped_updatesTelemetrySnapshot() async throws {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+        model.transcript = "texto"
+        model.currentQuestion = "pregunta"
+
+        model.consume(.started)
+        try await Task.sleep(nanoseconds: 80_000_000)
+        model.consume(.stopped)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        let recordedCount = await telemetrySpy.recordedCount()
+        XCTAssertEqual(recordedCount, 1)
+        XCTAssertEqual(model.telemetrySessionCount, 1)
+        XCTAssertGreaterThan(model.telemetryAverageProcessingSeconds, 0)
     }
 }
 
@@ -217,6 +245,29 @@ private final class SessionPersistenceSettingsStoreSpy: SessionPersistenceSettin
     }
 
     func save(_ settings: SessionPersistenceSettings) {}
+}
+
+private actor TelemetryStoreSpy: TelemetryPersisting {
+    private var recordedProcessingSeconds: [Double] = []
+    private var currentSnapshot: LocalTelemetrySnapshot = .empty
+
+    func recordSession(processingSeconds: Double) async throws {
+        recordedProcessingSeconds.append(processingSeconds)
+        let count = currentSnapshot.sessionCount + 1
+        let total = currentSnapshot.averageProcessingSeconds * Double(currentSnapshot.sessionCount)
+        currentSnapshot = LocalTelemetrySnapshot(
+            sessionCount: count,
+            averageProcessingSeconds: (total + processingSeconds) / Double(count)
+        )
+    }
+
+    func snapshot() async throws -> LocalTelemetrySnapshot {
+        currentSnapshot
+    }
+
+    func recordedCount() -> Int {
+        recordedProcessingSeconds.count
+    }
 }
 
 @MainActor
