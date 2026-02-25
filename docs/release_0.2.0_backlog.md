@@ -44,9 +44,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 ## P3 (post 0.2.0)
 - `✅` `P3.1` QA automatizado de flujos clave:
   - script reproducible para smoke de start/stop, importacion y export markdown.
-- `🚧` `P3.2` Evidencia automatizada de smoke para entregas:
+- `✅` `P3.2` Evidencia automatizada de smoke para entregas:
   - integrar ejecucion de `scripts/qa_smoke_flows.sh` en el ciclo de release local.
   - mantener checklist de QA con evidencia del ultimo run automatizado.
+- `🚧` `P3.3` Endurecimiento del gate local de entrega:
+  - comando unico de validacion (`release_local.sh`) documentado como entrada estandar de release local.
+  - checklist alineada con evidencia automatizada y comando canonico.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

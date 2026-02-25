@@ -38,5 +38,18 @@ Ultima actualizacion: 2026-02-25
   - resultado esperado: `SMOKE_START_STOP_OK` y `SMOKE_IMPORT_EXPORT_OK`.
   - logs generados en: `build/smoke/smoke_launch.log` y `build/smoke/smoke_tests.log`.
 
+## 5) Integracion en ciclo local de release (P3.2)
+- `✅` Integracion del smoke en release local:
+  - comando: `bash scripts/release_local.sh`
+  - comportamiento: build `.app` + ejecucion de `qa_smoke_flows.sh --skip-build`.
+  - evidencia automatizada persistida en: `build/smoke/qa_smoke_last_run.txt`.
+- `✅` Ultima evidencia automatizada registrada:
+  - `run_at_utc=2026-02-25T11:29:52Z`
+  - `commit=26d7626`
+  - `smoke_start_stop=SMOKE_START_STOP_OK`
+  - `smoke_import_export=SMOKE_IMPORT_EXPORT_OK`
+  - `launch_log=/Users/juancarlosmerlosalbarracin/Developer/Projects/FinalRoundLite/build/smoke/smoke_launch.log`
+  - `test_log=/Users/juancarlosmerlosalbarracin/Developer/Projects/FinalRoundLite/build/smoke/smoke_tests.log`
+
 ## Estado actual
 - `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.

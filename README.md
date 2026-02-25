@@ -29,6 +29,13 @@ cd Developer/Projects/FinalRoundLite
 bash scripts/qa_smoke_flows.sh
 ```
 
+## Ciclo Local de Release
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_local.sh
+```
+
 ## Uso
 
 1. Abre `Settings` y pega tu `OPENAI_API_KEY`.
