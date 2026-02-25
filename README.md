@@ -22,6 +22,13 @@ bash scripts/build_app.sh
 open build/FinalRoundLite.app
 ```
 
+## QA Smoke Automatizado
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/qa_smoke_flows.sh
+```
+
 ## Uso
 
 1. Abre `Settings` y pega tu `OPENAI_API_KEY`.

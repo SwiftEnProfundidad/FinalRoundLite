@@ -59,4 +59,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P2.1` ajustes avanzados (carpeta de persistencia y retencion configurable).
 - `✅` Implementar `P2.2` telemetria local no sensible (contador de sesiones y tiempo de procesamiento promedio).
 - `✅` Implementar `P2.3` eliminacion de `@preconcurrency` en `AudioCaptureService` con validacion en Swift 6.2 strict concurrency.
-- `🚧` Implementar `P3.1` QA automatizado de flujos clave (start/stop, importacion, export markdown).
+- `✅` Implementar `P3.1` QA automatizado de flujos clave (start/stop, importacion, export markdown).
+- `🚧` Implementar `P3.2` evidencia automatizada de smoke en ciclo de release local.

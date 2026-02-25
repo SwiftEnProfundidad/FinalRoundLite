@@ -31,5 +31,12 @@ Ultima actualizacion: 2026-02-25
   - `✅` Con persistencia local activa, se confirma JSON en `~/Library/Application Support/FinalRoundLite/sessions` (conteo de 1 -> 3 y payload con transcript+sugerencia).
   - `✅` `Copiar Markdown` devuelve contenido completo de transcript+sugerencia en portapapeles.
 
+## 4) Smoke automatizado de flujos clave (P3.1)
+- `✅` Script reproducible:
+  - comando: `bash scripts/qa_smoke_flows.sh`
+  - cobertura: start/stop del binario, importacion preflight y export markdown por `SmokeFlowTests`.
+  - resultado esperado: `SMOKE_START_STOP_OK` y `SMOKE_IMPORT_EXPORT_OK`.
+  - logs generados en: `build/smoke/smoke_launch.log` y `build/smoke/smoke_tests.log`.
+
 ## Estado actual
 - `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.
