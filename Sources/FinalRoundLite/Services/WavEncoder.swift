@@ -13,8 +13,8 @@ enum WavEncoder {
         header.append(contentsOf: "WAVE".utf8)
 
         header.append(contentsOf: "fmt ".utf8)
-        header.append(uint32LE(16)) // PCM fmt chunk size
-        header.append(uint16LE(1)) // PCM format
+        header.append(uint32LE(16))
+        header.append(uint16LE(1))
         header.append(uint16LE(UInt16(channels)))
         header.append(uint32LE(UInt32(sampleRate)))
         header.append(uint32LE(UInt32(byteRate)))
@@ -40,4 +40,3 @@ enum WavEncoder {
         return Data(bytes: &v, count: MemoryLayout<UInt32>.size)
     }
 }
-

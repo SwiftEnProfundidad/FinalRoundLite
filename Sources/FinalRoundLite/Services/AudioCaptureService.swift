@@ -94,7 +94,7 @@ final class AudioCaptureService {
         appendPCM16(from: converted)
 
         let framesPerChunk = Int(targetSampleRate * chunkDurationSeconds)
-        let bytesPerFrame = 2 // int16 mono
+        let bytesPerFrame = 2
         let requiredBytes = framesPerChunk * bytesPerFrame
 
         if pcm16Buffer.count >= requiredBytes {
@@ -105,7 +105,6 @@ final class AudioCaptureService {
             voiceFrameCount = 0
             totalFrameCount = 0
 
-            // Skip mostly-silence chunks.
             guard voiceRatio >= 0.08 else { return }
 
             let chunk = AudioChunk(
@@ -158,7 +157,6 @@ final class AudioCaptureService {
 }
 
 enum AudioVAD {
-    /// Very lightweight VAD: RMS threshold on the incoming buffer (in float).
     static func isVoice(_ buffer: AVAudioPCMBuffer) -> Bool {
         guard buffer.format.commonFormat == .pcmFormatFloat32,
               let channel = buffer.floatChannelData?.pointee
@@ -174,7 +172,6 @@ enum AudioVAD {
         }
         let rms = sqrt(sumSquares / Float(frames))
 
-        // Conservative threshold for close-talking mic.
         return rms > 0.012
     }
 }

@@ -33,6 +33,63 @@ struct SettingsView: View {
                 TextField("Language (ISO-639-1)", text: $model.languageCode)
             }
 
+            Section("Persistencia local") {
+                Toggle("Guardar sesiones en disco (JSON)", isOn: $model.persistSessionsLocally)
+                Text("Desactivado por defecto. Si esta activo, se guarda un JSON por sesion en Application Support.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Historial local") {
+                HStack(spacing: 10) {
+                    Button("Recargar") {
+                        model.refreshSavedSessions()
+                    }
+                    if model.isLoadingSavedSessions {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                }
+
+                if model.savedSessions.isEmpty {
+                    Text("No hay sesiones guardadas.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(Array(model.savedSessions.prefix(8))) { session in
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(session.savedAt, format: .dateTime.year().month().day().hour().minute())
+                                .font(.caption.bold())
+                            Text(session.jsonURL.lastPathComponent)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+
+                            HStack(spacing: 8) {
+                                Button("Abrir JSON") {
+                                    model.openSavedSessionJSON(session)
+                                }
+                                Button("Abrir Markdown") {
+                                    model.openSavedSessionMarkdown(session)
+                                }
+                                .disabled(session.markdownURL == nil)
+                                Button("Mostrar en Finder") {
+                                    model.revealSavedSessionInFinder(session)
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .padding(.vertical, 4)
+                    }
+
+                    if model.savedSessions.count > 8 {
+                        Text("Mostrando las 8 sesiones mas recientes.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
             Section("Context Card (System Design)") {
                 TextField("Problema", text: $model.contextCard.problem, axis: .vertical)
                 TextField("Usuarios", text: $model.contextCard.users, axis: .vertical)
@@ -45,6 +102,8 @@ struct SettingsView: View {
         }
         .padding(16)
         .frame(width: 560)
+        .task {
+            model.refreshSavedSessions()
+        }
     }
 }
-
