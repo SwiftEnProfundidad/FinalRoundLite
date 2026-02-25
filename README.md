@@ -29,12 +29,14 @@ cd Developer/Projects/FinalRoundLite
 bash scripts/qa_smoke_flows.sh
 ```
 
-## Ciclo Local de Release
+## Gate Canonico de Release Local
 
 ```bash
 cd Developer/Projects/FinalRoundLite
 bash scripts/release_local.sh
 ```
+
+`scripts/release_local.sh` es el comando canonico de validacion local: ejecuta tests completos, build release y smoke automatizado con verificacion de evidencia.
 
 ## Uso
 

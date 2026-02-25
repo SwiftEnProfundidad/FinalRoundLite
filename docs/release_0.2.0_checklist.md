@@ -43,13 +43,26 @@ Ultima actualizacion: 2026-02-25
   - comando: `bash scripts/release_local.sh`
   - comportamiento: build `.app` + ejecucion de `qa_smoke_flows.sh --skip-build`.
   - evidencia automatizada persistida en: `build/smoke/qa_smoke_last_run.txt`.
-- `✅` Ultima evidencia automatizada registrada:
-  - `run_at_utc=2026-02-25T11:29:52Z`
-  - `commit=26d7626`
+
+## 6) Gate canonico de entrega local (P3.3)
+- `✅` Comando unico de validacion local:
+  - comando canonico: `bash scripts/release_local.sh`
+  - valida en un solo flujo: `swift test` completo + build release + smoke automatizado.
+  - falla si la evidencia de smoke no corresponde al commit actual.
+- `✅` Evidencia automatizada de gate local (ultimo run):
+  - archivo: `build/smoke/release_local_gate.txt`
+  - `run_at_utc=2026-02-25T11:40:32Z`
+  - `commit=9103ad3`
+  - `swift_test=SWIFT_TEST_OK`
+  - `build_app=BUILD_APP_OK`
+  - `qa_smoke=QA_SMOKE_OK`
+  - `canonical_command=bash scripts/release_local.sh`
+- `✅` Evidencia de smoke enlazada por gate (ultimo run):
+  - archivo: `build/smoke/qa_smoke_last_run.txt`
+  - `run_at_utc=2026-02-25T11:40:39Z`
   - `smoke_start_stop=SMOKE_START_STOP_OK`
   - `smoke_import_export=SMOKE_IMPORT_EXPORT_OK`
-  - `launch_log=/Users/juancarlosmerlosalbarracin/Developer/Projects/FinalRoundLite/build/smoke/smoke_launch.log`
-  - `test_log=/Users/juancarlosmerlosalbarracin/Developer/Projects/FinalRoundLite/build/smoke/smoke_tests.log`
+  - logs: `build/smoke/smoke_launch.log` y `build/smoke/smoke_tests.log`
 
 ## Estado actual
 - `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.

@@ -47,9 +47,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P3.2` Evidencia automatizada de smoke para entregas:
   - integrar ejecucion de `scripts/qa_smoke_flows.sh` en el ciclo de release local.
   - mantener checklist de QA con evidencia del ultimo run automatizado.
-- `🚧` `P3.3` Endurecimiento del gate local de entrega:
+- `✅` `P3.3` Endurecimiento del gate local de entrega:
   - comando unico de validacion (`release_local.sh`) documentado como entrada estandar de release local.
   - checklist alineada con evidencia automatizada y comando canonico.
+- `🚧` `P3.4` Endurecimiento operativo del ciclo local:
+  - consolidar `release_local.sh` como paso previo obligatorio antes de cierre de release local.
+  - mantener visibilidad de evidencia de gate y smoke en documentacion operativa.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
