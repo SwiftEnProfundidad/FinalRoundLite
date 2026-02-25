@@ -32,10 +32,10 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - feedback visual durante analisis post-sesion (estado "analizando").
 
 ## P2 (mejora incremental)
-- `🚧` `P2.1` Ajustes avanzados:
+- `✅` `P2.1` Ajustes avanzados:
   - opcion para elegir carpeta de persistencia local.
   - limite configurable de retencion de sesiones.
-- `⏳` `P2.2` Telemetria local no sensible:
+- `🚧` `P2.2` Telemetria local no sensible:
   - contador local de sesiones y tiempo de procesamiento promedio.
 - `⏳` `P2.3` Eliminar `@preconcurrency` en `AudioCaptureService`:
   - migrar conversion de `AVAudioPCMBuffer` a una ruta sin captura non-Sendable en closure `@Sendable`.

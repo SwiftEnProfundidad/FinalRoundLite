@@ -22,7 +22,7 @@ final class SessionStoreTests: XCTestCase {
             )
         )
 
-        let url = try await store.save(session: session)
+        let url = try await store.save(session: session, retentionLimit: 10)
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.path()))
         let markdownURL = url.deletingPathExtension().appendingPathExtension("md")
         XCTAssertTrue(FileManager.default.fileExists(atPath: markdownURL.path()))
@@ -60,12 +60,55 @@ final class SessionStoreTests: XCTestCase {
             suggestion: PersistedSuggestion(currentQuestion: "q2", shortScript: "s2", clarifyingQuestions: [], tradeoffs: [], nextSteps: [])
         )
 
-        _ = try await store.save(session: older)
-        let newestURL = try await store.save(session: newer)
+        _ = try await store.save(session: older, retentionLimit: 10)
+        let newestURL = try await store.save(session: newer, retentionLimit: 10)
 
         let sessions = try await store.listSessions(limit: 10)
         XCTAssertEqual(sessions.count, 2)
         XCTAssertEqual(sessions.first?.jsonURL.lastPathComponent, newestURL.lastPathComponent)
         XCTAssertNotNil(sessions.first?.markdownURL)
+    }
+
+    func testSave_enforcesRetentionLimit() async throws {
+        let tempRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("FinalRoundLiteTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: tempRoot, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempRoot) }
+
+        let store = SessionStore(baseDirectoryURL: tempRoot)
+        let first = PersistedSession(
+            savedAt: Date(timeIntervalSince1970: 1_700_000_000),
+            context: ContextCard(),
+            transcript: "first",
+            suggestion: PersistedSuggestion(currentQuestion: "q1", shortScript: "s1", clarifyingQuestions: [], tradeoffs: [], nextSteps: [])
+        )
+        let second = PersistedSession(
+            savedAt: Date(timeIntervalSince1970: 1_700_000_100),
+            context: ContextCard(),
+            transcript: "second",
+            suggestion: PersistedSuggestion(currentQuestion: "q2", shortScript: "s2", clarifyingQuestions: [], tradeoffs: [], nextSteps: [])
+        )
+        let third = PersistedSession(
+            savedAt: Date(timeIntervalSince1970: 1_700_000_200),
+            context: ContextCard(),
+            transcript: "third",
+            suggestion: PersistedSuggestion(currentQuestion: "q3", shortScript: "s3", clarifyingQuestions: [], tradeoffs: [], nextSteps: [])
+        )
+
+        _ = try await store.save(session: first, retentionLimit: 2)
+        _ = try await store.save(session: second, retentionLimit: 2)
+        _ = try await store.save(session: third, retentionLimit: 2)
+
+        let sessions = try await store.listSessions(limit: 10)
+        XCTAssertEqual(sessions.count, 2)
+        XCTAssertEqual(sessions.map { $0.jsonURL.lastPathComponent }.count, 2)
+        let transcripts = try sessions.map { record in
+            let data = try Data(contentsOf: record.jsonURL)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let decoded = try decoder.decode(PersistedSession.self, from: data)
+            return decoded.transcript
+        }
+        XCTAssertEqual(Set(transcripts), Set(["second", "third"]))
     }
 }

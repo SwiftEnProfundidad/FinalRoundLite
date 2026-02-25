@@ -38,6 +38,35 @@ struct SettingsView: View {
                 Text("Desactivado por defecto. Si esta activo, se guarda un JSON por sesion en Application Support.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                Stepper(value: $model.sessionRetentionLimit, in: 1...200) {
+                    Text("Retencion maxima: \(model.sessionRetentionLimit) sesiones")
+                }
+
+                HStack(spacing: 8) {
+                    Button("Elegir carpeta…") {
+                        model.chooseSessionsDirectory()
+                    }
+                    Button("Usar carpeta por defecto") {
+                        model.resetSessionsDirectoryToDefault()
+                    }
+                    .disabled(model.usesDefaultSessionsDirectory)
+                    Button("Abrir carpeta") {
+                        model.revealSessionsDirectoryInFinder()
+                    }
+                }
+                .buttonStyle(.bordered)
+
+                if model.usesDefaultSessionsDirectory {
+                    Text("Carpeta actual: Application Support/FinalRoundLite/sessions")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(model.customSessionsDirectoryPath)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
             }
 
             Section("Historial local") {

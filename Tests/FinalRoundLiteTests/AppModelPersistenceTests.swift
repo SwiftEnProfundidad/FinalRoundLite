@@ -7,6 +7,7 @@ final class AppModelPersistenceTests: XCTestCase {
         let storeSpy = SessionStoreSpy()
         let model = AppModel(sessionStore: storeSpy)
         model.persistSessionsLocally = true
+        model.sessionRetentionLimit = 5
         model.transcript = "transcript de prueba"
         model.currentQuestion = "pregunta actual"
 
@@ -15,8 +16,10 @@ final class AppModelPersistenceTests: XCTestCase {
 
         let savedCount = await storeSpy.savedCount()
         let savedTranscript = await storeSpy.firstSavedTranscript()
+        let retentionLimit = await storeSpy.firstRetentionLimit()
         XCTAssertEqual(savedCount, 1)
         XCTAssertEqual(savedTranscript, "transcript de prueba")
+        XCTAssertEqual(retentionLimit, 5)
     }
 
     @MainActor
@@ -77,6 +80,43 @@ final class AppModelPersistenceTests: XCTestCase {
     }
 
     @MainActor
+    func testRefreshSavedSessions_usesRetentionLimitByDefault() async throws {
+        let storeSpy = SessionStoreSpy()
+        let model = AppModel(sessionStore: storeSpy)
+        model.sessionRetentionLimit = 3
+
+        model.refreshSavedSessions()
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        let listedLimit = await storeSpy.latestListedLimit()
+        XCTAssertEqual(listedLimit, 3)
+    }
+
+    @MainActor
+    func testInit_appliesStoredCustomDirectoryToConfigurableSessionStore() async throws {
+        let storeSpy = SessionStoreSpy()
+        let settingsSpy = SessionPersistenceSettingsStoreSpy(
+            loadedSettings: SessionPersistenceSettings(
+                customDirectoryPath: "/tmp/finalround-lite-custom",
+                retentionLimit: 7
+            )
+        )
+        let model = AppModel(
+            sessionStore: storeSpy,
+            persistenceSettingsStore: settingsSpy
+        )
+
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        XCTAssertFalse(model.usesDefaultSessionsDirectory)
+        XCTAssertEqual(model.customSessionsDirectoryPath, "/tmp/finalround-lite-custom")
+        XCTAssertEqual(model.sessionRetentionLimit, 7)
+
+        let configuredPath = await storeSpy.latestConfiguredDirectoryPath()
+        XCTAssertEqual(configuredPath, "/tmp/finalround-lite-custom")
+    }
+
+    @MainActor
     func testOpenSavedSessionActions_delegateToFileOpener() {
         let storeSpy = SessionStoreSpy()
         let openerSpy = FileOpenerSpy()
@@ -115,17 +155,26 @@ final class AppModelPersistenceTests: XCTestCase {
     }
 }
 
-private actor SessionStoreSpy: SessionPersisting {
+private actor SessionStoreSpy: SessionPersisting, SessionStoreConfiguring {
     private var sessions: [PersistedSession] = []
     private var sessionsForListing: [SavedSessionRecord] = []
+    private var retentionLimits: [Int?] = []
+    private var listedLimits: [Int] = []
+    private var configuredDirectoryURLs: [URL?] = []
 
-    func save(session: PersistedSession) async throws -> URL {
+    func save(session: PersistedSession, retentionLimit: Int?) async throws -> URL {
         sessions.append(session)
+        retentionLimits.append(retentionLimit)
         return URL(fileURLWithPath: "/tmp/finalround-lite-session-test.json")
     }
 
     func listSessions(limit: Int) async throws -> [SavedSessionRecord] {
-        Array(sessionsForListing.prefix(limit))
+        listedLimits.append(limit)
+        return Array(sessionsForListing.prefix(limit))
+    }
+
+    func setBaseDirectoryURL(_ url: URL?) async {
+        configuredDirectoryURLs.append(url)
     }
 
     func setListedSessions(_ sessions: [SavedSessionRecord]) {
@@ -139,6 +188,35 @@ private actor SessionStoreSpy: SessionPersisting {
     func firstSavedTranscript() -> String? {
         sessions.first?.transcript
     }
+
+    func firstRetentionLimit() -> Int? {
+        retentionLimits.first ?? nil
+    }
+
+    func latestListedLimit() -> Int? {
+        listedLimits.last
+    }
+
+    func latestConfiguredDirectoryPath() -> String? {
+        if let latest = configuredDirectoryURLs.last {
+            return latest?.path
+        }
+        return nil
+    }
+}
+
+private final class SessionPersistenceSettingsStoreSpy: SessionPersistenceSettingsStoring {
+    private let loadedSettings: SessionPersistenceSettings
+
+    init(loadedSettings: SessionPersistenceSettings = .default) {
+        self.loadedSettings = loadedSettings
+    }
+
+    func load() -> SessionPersistenceSettings {
+        loadedSettings
+    }
+
+    func save(_ settings: SessionPersistenceSettings) {}
 }
 
 @MainActor

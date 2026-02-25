@@ -56,4 +56,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Auditoria y correccion de cumplimiento de skills iOS prioritarias (`windsurf-rules-ios`, `swift-concurrency`, `swiftui-expert-skill`) en codigo y tests.
 - `✅` Implementar `P1.1` Historial local minimo (listar sesiones guardadas y abrir JSON/Markdown desde la app).
 - `✅` Implementar `P1.2` mejoras de usabilidad (limpieza explicita y estado "analizando").
-- `🚧` Implementar `P2.1` ajustes avanzados (carpeta de persistencia y retencion configurable).
+- `✅` Implementar `P2.1` ajustes avanzados (carpeta de persistencia y retencion configurable).
+- `🚧` Implementar `P2.2` telemetria local no sensible (contador de sesiones y tiempo de procesamiento promedio).

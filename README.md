@@ -29,7 +29,7 @@ open build/FinalRoundLite.app
 3. Pulsa `Start` y habla.
 4. Copia o guarda el Markdown con el transcript + sugerencias.
 5. Opcional: pulsa `Importar audio` para analizar un archivo sin captura en vivo (wav, mp3, mpga, mpeg, m4a, mp4, webm, ogg; maximo 25 MB).
-6. Opcional: activa en `Settings` la persistencia local para guardar cada sesion como JSON.
+6. Opcional: activa en `Settings` la persistencia local para guardar cada sesion como JSON; tambien puedes elegir carpeta destino y retencion maxima.
 
 ## Roadmap
 

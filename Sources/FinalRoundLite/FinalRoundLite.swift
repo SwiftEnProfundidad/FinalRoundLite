@@ -7,7 +7,6 @@ struct FinalRoundLiteApp: App {
     init() {
         _model = State(
             initialValue: AppModel(
-                sessionStore: SessionStore(),
                 fileOpener: WorkspaceFileOpener()
             )
         )

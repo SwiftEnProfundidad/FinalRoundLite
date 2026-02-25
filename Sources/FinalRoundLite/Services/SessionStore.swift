@@ -1,8 +1,12 @@
 import Foundation
 
 protocol SessionPersisting: Sendable {
-    func save(session: PersistedSession) async throws -> URL
+    func save(session: PersistedSession, retentionLimit: Int?) async throws -> URL
     func listSessions(limit: Int) async throws -> [SavedSessionRecord]
+}
+
+protocol SessionStoreConfiguring: Sendable {
+    func setBaseDirectoryURL(_ url: URL?) async
 }
 
 struct SavedSessionRecord: Sendable, Identifiable, Equatable {
@@ -28,16 +32,20 @@ struct PersistedSession: Codable, Sendable {
     var suggestion: PersistedSuggestion
 }
 
-actor SessionStore: SessionPersisting {
+actor SessionStore: SessionPersisting, SessionStoreConfiguring {
     private let fileManager: FileManager
-    private let baseDirectoryURL: URL?
+    private var baseDirectoryURL: URL?
 
     init(fileManager: FileManager = .default, baseDirectoryURL: URL? = nil) {
         self.fileManager = fileManager
         self.baseDirectoryURL = baseDirectoryURL
     }
 
-    func save(session: PersistedSession) throws -> URL {
+    func setBaseDirectoryURL(_ url: URL?) {
+        baseDirectoryURL = url
+    }
+
+    func save(session: PersistedSession, retentionLimit: Int?) throws -> URL {
         let directory = try sessionsDirectoryURL()
         let timestamp = Int(session.savedAt.timeIntervalSince1970)
         let suffix = String(UUID().uuidString.prefix(8))
@@ -64,6 +72,10 @@ actor SessionStore: SessionPersisting {
             )
         )
         try Data(markdown.utf8).write(to: markdownURL, options: .atomic)
+
+        if let retentionLimit {
+            try enforceRetention(limit: retentionLimit, in: directory)
+        }
 
         return jsonURL
     }
@@ -97,26 +109,47 @@ actor SessionStore: SessionPersisting {
     }
 
     private func sessionsDirectoryURL() throws -> URL {
-        let root: URL
+        let sessionsDirectory: URL
         if let baseDirectoryURL {
-            root = baseDirectoryURL
+            sessionsDirectory = baseDirectoryURL
         } else {
-            root = try fileManager.url(
+            sessionsDirectory = try fileManager.url(
                 for: .applicationSupportDirectory,
                 in: .userDomainMask,
                 appropriateFor: nil,
                 create: true
             )
-        }
-
-        let sessionsDirectory = root
             .appendingPathComponent("FinalRoundLite", isDirectory: true)
             .appendingPathComponent("sessions", isDirectory: true)
+        }
 
         if !fileManager.fileExists(atPath: sessionsDirectory.path()) {
             try fileManager.createDirectory(at: sessionsDirectory, withIntermediateDirectories: true)
         }
         return sessionsDirectory
+    }
+
+    private func enforceRetention(limit: Int, in directory: URL) throws {
+        let effectiveLimit = max(1, limit)
+        let urls = try fileManager.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.creationDateKey, .contentModificationDateKey],
+            options: [.skipsHiddenFiles]
+        )
+        let sessionJSONFiles = urls.filter {
+            $0.pathExtension.lowercased() == "json" && $0.lastPathComponent.hasPrefix("session-")
+        }
+        let sorted = sessionJSONFiles.sorted { savedDate(for: $0) > savedDate(for: $1) }
+        guard sorted.count > effectiveLimit else { return }
+
+        let stale = sorted.dropFirst(effectiveLimit)
+        for jsonURL in stale {
+            try? fileManager.removeItem(at: jsonURL)
+            let markdownURL = jsonURL.deletingPathExtension().appendingPathExtension("md")
+            if fileManager.fileExists(atPath: markdownURL.path()) {
+                try? fileManager.removeItem(at: markdownURL)
+            }
+        }
     }
 
     private func savedDate(for url: URL) -> Date {
