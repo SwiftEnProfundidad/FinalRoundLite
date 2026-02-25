@@ -64,4 +64,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P3.3` endurecimiento del gate local de entrega con comando canonico de release.
 - `✅` Implementar `P3.4` endurecimiento operativo del ciclo local de release y evidencia.
 - `✅` Implementar `P3.5` operativa de cierre de release local con secuencia canonica final.
-- `🚧` Implementar `P3.6` cierre operacional del ciclo local de release y handoff.
+- `✅` Implementar `P3.6` cierre operacional del ciclo local de release y handoff.
+- `🚧` Implementar `P3.7` handoff final de entrega con comando unico obligatorio.

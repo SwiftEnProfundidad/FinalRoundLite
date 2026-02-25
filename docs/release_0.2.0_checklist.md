@@ -88,5 +88,21 @@ Ultima actualizacion: 2026-02-25
   - `step_1_release_local=bash scripts/release_local.sh`
   - `step_2_release_gate_status=bash scripts/release_gate_status.sh`
 
+## 9) Handoff operativo obligatorio por commit (P3.6)
+- `✅` Comando de handoff final por commit de entrega:
+  - comando: `bash scripts/release_handoff_local.sh`
+  - ejecuta la secuencia obligatoria de cierre y verifica coherencia de evidencias con `HEAD`.
+  - salida esperada: `RELEASE_HANDOFF_LOCAL_OK`.
+- `✅` Resumen de handoff generado:
+  - archivo: `build/smoke/release_handoff_local.txt`
+  - contenido minimo: branch, commit y rutas de evidencia (`gate/smoke/close`).
+- `✅` Ultimo resumen de handoff generado:
+  - `release_handoff_local=OK`
+  - `branch=feature/p1-2-usabilidad`
+  - `commit=7f763b8`
+  - `mandatory_step_1=bash scripts/release_local.sh`
+  - `mandatory_step_2=bash scripts/release_gate_status.sh`
+  - `mandatory_step_3=bash scripts/release_close_checklist.sh`
+
 ## Estado actual
 - `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.

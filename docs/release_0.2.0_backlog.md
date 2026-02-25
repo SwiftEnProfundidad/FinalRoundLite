@@ -56,9 +56,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P3.5` Operativa de cierre de release local:
   - estandarizar checklist final de cierre usando `release_local.sh` + `release_gate_status.sh`.
   - documentar ruta minima de comandos para validacion final previa a entrega.
-- `🚧` `P3.6` Cierre operacional del ciclo:
+- `✅` `P3.6` Cierre operacional del ciclo:
   - consolidar checklist final de release local como paso de handoff obligatorio.
   - mantener actualizacion de evidencia (gate/smoke/close checklist) por commit de entrega.
+- `🚧` `P3.7` Handoff final de entrega:
+  - consolidar comando unico de handoff en documentacion de cierre.
+  - mantener salida de handoff como resumen operativo para entrega al siguiente turno.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

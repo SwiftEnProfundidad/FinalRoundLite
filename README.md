@@ -62,6 +62,13 @@ cd Developer/Projects/FinalRoundLite
 bash scripts/release_close_checklist.sh
 ```
 
+Handoff operativo obligatorio por commit de entrega:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_handoff_local.sh
+```
+
 ## Uso
 
 1. Abre `Settings` y pega tu `OPENAI_API_KEY`.
