@@ -37,9 +37,13 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - limite configurable de retencion de sesiones.
 - `✅` `P2.2` Telemetria local no sensible:
   - contador local de sesiones y tiempo de procesamiento promedio.
-- `🚧` `P2.3` Eliminar `@preconcurrency` en `AudioCaptureService`:
+- `✅` `P2.3` Eliminar `@preconcurrency` en `AudioCaptureService`:
   - migrar conversion de `AVAudioPCMBuffer` a una ruta sin captura non-Sendable en closure `@Sendable`.
   - mantener validacion con tests/construccion en Swift 6.2 strict concurrency.
+
+## P3 (post 0.2.0)
+- `🚧` `P3.1` QA automatizado de flujos clave:
+  - script reproducible para smoke de start/stop, importacion y export markdown.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
