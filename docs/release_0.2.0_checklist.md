@@ -408,5 +408,59 @@ Ultima actualizacion: 2026-02-26
   - comando: `swift test`
   - resultado: `56 tests, 0 failures`.
 
+## 32) Operativa de cierre del ciclo P10 (P10.5)
+- `✅` Validacion remota previa a merge:
+  - comando: `bash scripts/release_pr_monitor.sh 6`
+  - resultado final de premerge: `PR #6 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
+- `✅` Cierre en plataforma:
+  - comando ejecutado: `gh pr merge 6 --merge`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/6`
+  - estado: `MERGED`
+  - merged_at: `2026-02-26T23:17:00Z`
+  - merge_commit: `1bec779b4f6b74285cde89f676126ac8448973f8`
+- `✅` Sincronizacion post-merge y continuidad:
+  - comandos ejecutados:
+    - `git checkout develop`
+    - `git pull --ff-only origin develop`
+    - `git checkout -b feature/p11-1-arranque-post-p10`
+  - resultado: `develop` alineada al merge de `P10` y rama de continuidad creada.
+
+## 33) Arranque de nuevo ciclo post-P10 (P11.1)
+- `✅` Publicacion de rama de continuidad:
+  - comando: `git push -u origin feature/p11-1-arranque-post-p10`
+  - resultado: rama publicada con tracking remoto activo.
+- `✅` PR de continuidad abierta:
+  - comando: `gh pr create --base develop --head feature/p11-1-arranque-post-p10 ...`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/7`
+  - estado inicial: `OPEN`.
+- `✅` Monitor remoto del nuevo ciclo:
+  - comando: `bash scripts/release_pr_monitor.sh 7`
+  - resultado: `RELEASE_PR_MONITOR_OK`
+  - snapshot: `PR #7 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
+
+## 34) Definicion del incremento funcional del ciclo P11 (P11.2)
+- `✅` Alcance priorizado del bloque P11:
+  - `P11.3`: atajos de teclado y accesibilidad del panel.
+  - `P11.4`: cierre operativo de PR de continuidad del ciclo.
+- `✅` Criterio de ejecucion:
+  - aplicar primero mejoras directas de operativa en panel (`P11.3`).
+  - mantener cierre remoto/merge como siguiente paso (`P11.4`).
+
+## 35) Atajos de teclado y accesibilidad en panel (P11.3)
+- `✅` Atajos de teclado en acciones clave:
+  - `Cmd+Return`: iniciar/detener practica.
+  - `Cmd+Shift+I`: analizar archivo.
+  - `Cmd+Shift+C`: copiar reporte.
+  - `Cmd+S`: guardar reporte.
+  - `Cmd+Shift+K`: limpiar salida.
+  - `Cmd+Option+E`: expandir/contraer resultados.
+  - `Cmd+W`: cerrar panel.
+  - `Cmd+Q`: salir.
+- `✅` Refuerzo de accesibilidad:
+  - labels/hints de VoiceOver para botones `MD`, `JSON` y `Borrar` en historial rapido.
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `56 tests, 0 failures`.
+
 ## Estado actual
-- `P10.4` completado; `P10.5` en construccion para cierre operativo del ciclo P10.
+- `P11.3` completado; `P11.4` en construccion para cierre operativo del ciclo P11.
