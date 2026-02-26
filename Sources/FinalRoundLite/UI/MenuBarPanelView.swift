@@ -6,6 +6,7 @@ struct MenuBarPanelView: View {
     @State private var isCompactMode = false
     @State private var isTranscriptExpanded = true
     @State private var isCoachExpanded = true
+    @State private var sessionPendingDeletion: SavedSessionRecord?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -20,6 +21,20 @@ struct MenuBarPanelView: View {
         .frame(width: 452)
         .task {
             model.refreshPanelSavedSessions()
+        }
+        .confirmationDialog("Borrar sesion local", isPresented: isDeleteSessionDialogPresented, titleVisibility: .visible) {
+            Button("Borrar", role: .destructive) {
+                guard let sessionPendingDeletion else { return }
+                model.deleteSavedSession(sessionPendingDeletion)
+                self.sessionPendingDeletion = nil
+            }
+            Button("Cancelar", role: .cancel) {
+                sessionPendingDeletion = nil
+            }
+        } message: {
+            if let sessionPendingDeletion {
+                Text("Se borrara \(sessionPendingDeletion.jsonURL.lastPathComponent).")
+            }
         }
     }
 
@@ -469,9 +484,29 @@ struct MenuBarPanelView: View {
             }
             .buttonStyle(.bordered)
             .font(.caption2)
+
+            Button {
+                sessionPendingDeletion = session
+            } label: {
+                Image(systemName: "trash")
+            }
+            .buttonStyle(.bordered)
+            .font(.caption2)
+            .tint(.red)
         }
         .padding(8)
         .background(.quaternary.opacity(0.3), in: .rect(cornerRadius: 8))
+    }
+
+    private var isDeleteSessionDialogPresented: Binding<Bool> {
+        Binding(
+            get: { sessionPendingDeletion != nil },
+            set: { isPresented in
+                if !isPresented {
+                    sessionPendingDeletion = nil
+                }
+            }
+        )
     }
 
     private func closePanelWindow() {

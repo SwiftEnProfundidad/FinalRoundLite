@@ -315,5 +315,21 @@ Ultima actualizacion: 2026-02-26
   - seguimiento por fases: `P9.1` marcado `✅`.
   - siguiente item activo: `P9.2` en `🚧`.
 
+## 25) Definicion de incremento post-P8 (P9.2)
+- `✅` Alcance priorizado del ciclo P9:
+  - `P9.3`: borrado rapido desde panel menubar.
+  - `P9.4`: cierre operativo de PR del ciclo P9.
+
+## 26) Borrado rapido desde panel menubar (P9.3)
+- `✅` UI del panel extendida con accion destructiva:
+  - bloque `Historial rapido` ahora incluye accion de borrado por fila.
+  - confirmacion destructiva antes de ejecutar borrado.
+- `✅` Integracion con operativa existente de borrado:
+  - reutiliza `model.deleteSavedSession(_:)`.
+  - mantiene consistencia entre `savedSessions` y `panelSavedSessions`.
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `52 tests, 0 failures`.
+
 ## Estado actual
-- `P9.1` completado; `P9.2` en construccion para definir el siguiente incremento funcional.
+- `P9.3` completado; `P9.4` en construccion para cierre operativo del ciclo P9.
