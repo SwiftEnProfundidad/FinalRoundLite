@@ -193,5 +193,46 @@ Ultima actualizacion: 2026-02-26
   - merged_at: `2026-02-26T22:05:33Z`
   - merge_commit: `f17f0a81f6062095dffba7663fd70d4cf00c1d2f`
 
+## 18) Arranque del siguiente incremento (P8.1)
+- `✅` Sincronizacion post-merge de base:
+  - comandos ejecutados: `git checkout develop` y `git pull --ff-only origin develop`
+  - resultado: `develop` alineada en `f17f0a8` (merge de PR `#3`).
+- `✅` Base de trabajo del nuevo ciclo preparada:
+  - comandos ejecutados:
+    - `git checkout -b feature/p8-1-arranque-siguiente-incremento`
+    - `git push -u origin feature/p8-1-arranque-siguiente-incremento`
+    - `gh pr create --base develop --head feature/p8-1-arranque-siguiente-incremento ...`
+  - PR de continuidad: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/4`
+  - estado actual PR `#4`: `OPEN`, `merge_state_status=CLEAN`.
+- `✅` Monitor de estado del nuevo ciclo:
+  - comando: `bash scripts/release_pr_monitor.sh 4`
+  - salida: `RELEASE_PR_MONITOR_OK`
+  - run_at_utc: `2026-02-26T22:06:45Z`
+  - action_required: `false`
+
+## 19) Definicion del siguiente incremento funcional (P8.2)
+- `✅` Alcance priorizado acordado para el siguiente bloque:
+  - `P8.3` historial rapido en panel menubar (ultimas sesiones + apertura directa).
+  - `P8.4` filtro de historial en Settings.
+  - `P8.5` limpieza de historial con confirmacion y cobertura de tests/smoke.
+- `✅` Criterio de ejecucion del bloque:
+  - avanzar por orden `P8.3 -> P8.4 -> P8.5`.
+  - mantener monitor de PR de continuidad (`#4`) en estado limpio durante la ejecucion.
+
+## 20) Historial rapido en panel menubar (P8.3)
+- `✅` Estado dedicado para historial rapido en `AppModel`:
+  - propiedades: `panelSavedSessions` e `isLoadingPanelSavedSessions`.
+  - accion: `refreshPanelSavedSessions(limit:)`.
+- `✅` UI del panel con acceso rapido a sesiones recientes:
+  - bloque nuevo `Historial rapido` en menubar.
+  - acciones directas por fila: `MD` y `JSON`.
+  - refresco manual con `Actualizar` y carga inicial via `.task`.
+- `✅` Cobertura de tests:
+  - test nuevo: `testRefreshPanelSavedSessions_loadsRecentSubset`.
+  - test ajustado: `testRefreshSavedSessions_loadsMostRecentSessions` valida sincronizacion con `panelSavedSessions`.
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `44 tests, 0 failures`.
+
 ## Estado actual
-- `P7.2` completado; `P8.1` en construccion para arranque del siguiente incremento.
+- `P8.3` completado; `P8.4` en construccion para filtro de historial en Settings.

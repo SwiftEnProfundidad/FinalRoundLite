@@ -80,7 +80,38 @@ final class AppModelPersistenceTests: XCTestCase {
         try await Task.sleep(nanoseconds: 150_000_000)
 
         XCTAssertEqual(model.savedSessions, [second, first])
+        XCTAssertEqual(model.panelSavedSessions, [second, first])
         XCTAssertFalse(model.isLoadingSavedSessions)
+    }
+
+    @MainActor
+    func testRefreshPanelSavedSessions_loadsRecentSubset() async throws {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-1.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-1.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-2.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-2.md")
+        )
+        let third = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 30),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-3.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-3.md")
+        )
+        await storeSpy.setListedSessions([third, second, first])
+
+        model.refreshPanelSavedSessions(limit: 2)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        XCTAssertEqual(model.panelSavedSessions, [third, second])
+        XCTAssertFalse(model.isLoadingPanelSavedSessions)
     }
 
     @MainActor

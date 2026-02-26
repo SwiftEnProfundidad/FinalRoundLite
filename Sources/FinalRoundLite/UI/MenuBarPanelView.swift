@@ -11,12 +11,16 @@ struct MenuBarPanelView: View {
         VStack(alignment: .leading, spacing: 12) {
             statusCard
             controlsCard
+            recentSessionsCard
             transcriptCard
             suggestionCard
             footer
         }
         .padding(12)
         .frame(width: 452)
+        .task {
+            model.refreshPanelSavedSessions()
+        }
     }
 
     private var statusCard: some View {
@@ -154,6 +158,41 @@ struct MenuBarPanelView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
                     .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
+            }
+        }
+        .panelCardStyle()
+    }
+
+    private var recentSessionsCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Historial rapido")
+                    .font(.subheadline.bold())
+                Spacer()
+                if model.isLoadingPanelSavedSessions {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+                Button("Actualizar") {
+                    model.refreshPanelSavedSessions()
+                }
+                .buttonStyle(.borderless)
+                .font(.caption2.weight(.semibold))
+            }
+
+            if model.panelSavedSessions.isEmpty {
+                Text("No hay sesiones recientes. Activa persistencia local y finaliza una sesion.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(model.panelSavedSessions) { session in
+                        quickSessionRow(session)
+                    }
+                }
             }
         }
         .panelCardStyle()
@@ -402,6 +441,37 @@ struct MenuBarPanelView: View {
             return model.shortScript.count > limit ? "\(slice)…" : slice
         }
         return "Sin coach todavia."
+    }
+
+    private func quickSessionRow(_ session: SavedSessionRecord) -> some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(session.savedAt, format: .dateTime.day().month().hour().minute())
+                    .font(.caption.bold())
+                Text(session.jsonURL.lastPathComponent)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+
+            Spacer(minLength: 4)
+
+            Button("MD") {
+                model.openSavedSessionMarkdown(session)
+            }
+            .buttonStyle(.bordered)
+            .font(.caption2)
+            .disabled(session.markdownURL == nil)
+
+            Button("JSON") {
+                model.openSavedSessionJSON(session)
+            }
+            .buttonStyle(.bordered)
+            .font(.caption2)
+        }
+        .padding(8)
+        .background(.quaternary.opacity(0.3), in: .rect(cornerRadius: 8))
     }
 
     private func closePanelWindow() {

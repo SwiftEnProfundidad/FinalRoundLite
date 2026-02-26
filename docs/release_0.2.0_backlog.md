@@ -105,9 +105,21 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - completar merge de release cuando el estado de plataforma lo permita.
 
 ## P8 (siguiente ciclo)
-- `🚧` `P8.1` Arranque del siguiente incremento:
+- `✅` `P8.1` Arranque del siguiente incremento:
   - sincronizar `develop` local con el estado post-merge.
   - preparar base de trabajo para el siguiente bloque funcional.
+- `✅` `P8.2` Definicion del siguiente incremento funcional:
+  - concretar alcance del siguiente bloque y su prioridad.
+  - desglosar tareas ejecutables para la siguiente iteracion de implementacion.
+- `✅` `P8.3` Historial rapido en panel menubar:
+  - mostrar ultimas sesiones en el panel sin salir a Settings.
+  - permitir abrir markdown/json directamente desde ese bloque.
+- `🚧` `P8.4` Filtro de historial en Settings:
+  - busqueda por texto para sesiones guardadas.
+  - mantener apertura de archivos sin romper flujo actual.
+- `⏳` `P8.5` Operativa de limpieza de historial:
+  - accion de borrado de una sesion y limpieza total con confirmacion.
+  - actualizar tests y smoke para cubrir nuevas acciones de historial.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
