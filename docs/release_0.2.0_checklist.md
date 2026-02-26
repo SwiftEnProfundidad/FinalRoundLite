@@ -232,7 +232,33 @@ Ultima actualizacion: 2026-02-26
   - test ajustado: `testRefreshSavedSessions_loadsMostRecentSessions` valida sincronizacion con `panelSavedSessions`.
 - `✅` Verificacion local:
   - comando: `swift test`
-  - resultado: `44 tests, 0 failures`.
+  - resultado: `47 tests, 0 failures`.
+
+## 21) Filtro de historial en Settings (P8.4)
+- `✅` Logica de filtrado en `AppModel`:
+  - metodo: `filteredSavedSessions(matching:limit:)`.
+  - criterios de match: nombre de JSON, nombre de Markdown y fecha formateada.
+  - busqueda con `localizedStandardContains`.
+- `✅` UI de Settings conectada al filtro:
+  - campo de busqueda: `Buscar sesiones (archivo o fecha)`.
+  - listado de historial usa sesiones filtradas y mantiene acciones existentes:
+    - `Abrir JSON`
+    - `Abrir Markdown`
+    - `Mostrar en Finder`
+  - feedback para vacio sin datos y vacio sin coincidencias.
+- `✅` Cobertura de tests del filtro:
+  - `testFilteredSavedSessions_whenQueryEmpty_usesLimitAndOrder`
+  - `testFilteredSavedSessions_matchesByFilename`
+  - `testFilteredSavedSessions_returnsEmptyWhenNoMatch`
+- `✅` Verificacion local:
+  - comando: `swift test --filter AppModelPersistenceTests`
+  - resultado: `13 tests, 0 failures`.
+  - comando: `swift test`
+  - resultado: `47 tests, 0 failures`.
+- `✅` Estado remoto durante ejecucion:
+  - comando: `bash scripts/release_pr_monitor.sh 4`
+  - run_at_utc: `2026-02-26T22:26:23Z`
+  - resultado: `PR #4 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
 
 ## Estado actual
-- `P8.3` completado; `P8.4` en construccion para filtro de historial en Settings.
+- `P8.4` completado; `P8.5` en construccion para operativa de limpieza de historial.

@@ -80,4 +80,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P8.1` arranque del siguiente incremento (sincronizacion post-merge y base de trabajo con rama/PR nueva).
 - `✅` Implementar `P8.2` definicion del siguiente incremento funcional (alcance priorizado y desglose ejecutable).
 - `✅` Implementar `P8.3` historial rapido en panel menubar (ultimas sesiones + apertura directa desde panel).
-- `🚧` Implementar `P8.4` filtro de historial en Settings (busqueda local por texto sin romper flujo actual).
+- `✅` Implementar `P8.4` filtro de historial en Settings (busqueda local por texto en archivo/fecha).
+- `🚧` Implementar `P8.5` operativa de limpieza de historial (borrado puntual/total con confirmacion).

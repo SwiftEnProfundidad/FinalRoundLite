@@ -129,6 +129,76 @@ final class AppModelPersistenceTests: XCTestCase {
     }
 
     @MainActor
+    func testFilteredSavedSessions_whenQueryEmpty_usesLimitAndOrder() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-alpha.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-alpha.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-beta.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-beta.md")
+        )
+        let third = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 30),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-gamma.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-gamma.md")
+        )
+        model.savedSessions = [third, second, first]
+
+        let filtered = model.filteredSavedSessions(matching: "", limit: 2)
+
+        XCTAssertEqual(filtered, [third, second])
+    }
+
+    @MainActor
+    func testFilteredSavedSessions_matchesByFilename() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let matching = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/interview-system-design.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/interview-system-design.md")
+        )
+        let nonMatching = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-random.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-random.md")
+        )
+        model.savedSessions = [matching, nonMatching]
+
+        let filtered = model.filteredSavedSessions(matching: "system", limit: 8)
+
+        XCTAssertEqual(filtered, [matching])
+    }
+
+    @MainActor
+    func testFilteredSavedSessions_returnsEmptyWhenNoMatch() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        model.savedSessions = [
+            SavedSessionRecord(
+                savedAt: Date(timeIntervalSince1970: 10),
+                jsonURL: URL(fileURLWithPath: "/tmp/session-a.json"),
+                markdownURL: URL(fileURLWithPath: "/tmp/session-a.md")
+            )
+        ]
+
+        let filtered = model.filteredSavedSessions(matching: "zz-no-match", limit: 8)
+
+        XCTAssertTrue(filtered.isEmpty)
+    }
+
+    @MainActor
     func testInit_appliesStoredCustomDirectoryToConfigurableSessionStore() async throws {
         let storeSpy = SessionStoreSpy()
         let telemetrySpy = TelemetryStoreSpy()

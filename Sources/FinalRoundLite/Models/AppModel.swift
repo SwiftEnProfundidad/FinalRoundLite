@@ -252,6 +252,27 @@ final class AppModel {
         }
     }
 
+    func filteredSavedSessions(matching query: String, limit: Int = 8) -> [SavedSessionRecord] {
+        let effectiveLimit = max(1, limit)
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else {
+            return Array(savedSessions.prefix(effectiveLimit))
+        }
+
+        return Array(
+            savedSessions
+                .filter { session in
+                    let jsonName = session.jsonURL.lastPathComponent
+                    let markdownName = session.markdownURL?.lastPathComponent ?? ""
+                    let savedAtText = session.savedAt.formatted(date: .abbreviated, time: .shortened)
+                    return jsonName.localizedStandardContains(trimmedQuery) ||
+                        markdownName.localizedStandardContains(trimmedQuery) ||
+                        savedAtText.localizedStandardContains(trimmedQuery)
+                }
+                .prefix(effectiveLimit)
+        )
+    }
+
     func refreshPanelSavedSessions(limit: Int = panelSavedSessionsLimit) {
         isLoadingPanelSavedSessions = true
         let effectiveLimit = max(1, limit)

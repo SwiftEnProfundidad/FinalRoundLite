@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Bindable var model: AppModel
     @State private var apiKeyDraft = ""
+    @State private var historySearchQuery = ""
 
     var body: some View {
         Form {
@@ -89,12 +90,18 @@ struct SettingsView: View {
                     }
                 }
 
+                TextField("Buscar sesiones (archivo o fecha)", text: $historySearchQuery)
+
                 if model.savedSessions.isEmpty {
                     Text("No hay sesiones guardadas.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                } else if filteredSavedSessions.isEmpty {
+                    Text("No hay coincidencias para \"\(historySearchQuery)\".")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 } else {
-                    ForEach(Array(model.savedSessions.prefix(8))) { session in
+                    ForEach(filteredSavedSessions) { session in
                         VStack(alignment: .leading, spacing: 6) {
                             Text(session.savedAt, format: .dateTime.year().month().day().hour().minute())
                                 .font(.caption.bold())
@@ -120,7 +127,7 @@ struct SettingsView: View {
                         .padding(.vertical, 4)
                     }
 
-                    if model.savedSessions.count > 8 {
+                    if historySearchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, model.savedSessions.count > 8 {
                         Text("Mostrando las 8 sesiones mas recientes.")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -151,5 +158,9 @@ struct SettingsView: View {
         .task {
             model.refreshSavedSessions()
         }
+    }
+
+    private var filteredSavedSessions: [SavedSessionRecord] {
+        model.filteredSavedSessions(matching: historySearchQuery, limit: 8)
     }
 }
