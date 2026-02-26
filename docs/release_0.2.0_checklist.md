@@ -289,5 +289,31 @@ Ultima actualizacion: 2026-02-26
   - comando: `swift test`
   - resultado: `52 tests, 0 failures`.
 
+## 23) Cierre del bloque P8 (P8.6)
+- `✅` Validacion remota previa al merge:
+  - comando: `bash scripts/release_pr_monitor.sh 4`
+  - resultado previo: `PR #4 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
+- `✅` Cierre en plataforma:
+  - comando ejecutado: `gh pr merge 4 --merge`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/4`
+  - estado final: `MERGED`
+  - merged_at: `2026-02-26T23:04:10Z`
+  - merge_commit: `6739ac0f1a30af5164ea82bbae752b7f5a121a44`
+- `✅` Sincronizacion de base post-merge:
+  - comandos ejecutados:
+    - `git checkout develop`
+    - `git pull --ff-only origin develop`
+  - resultado: `develop` alineada al merge de `P8`.
+- `✅` Arranque de continuidad del siguiente ciclo:
+  - comandos ejecutados:
+    - `git checkout -b feature/p9-1-cierre-bloque-p8`
+    - `git push -u origin feature/p9-1-cierre-bloque-p8`
+
+## 24) Arranque del nuevo ciclo (P9.1)
+- `✅` Tracking inicial consolidado:
+  - backlog: `P9.1` marcado `✅`.
+  - seguimiento por fases: `P9.1` marcado `✅`.
+  - siguiente item activo: `P9.2` en `🚧`.
+
 ## Estado actual
-- `P8.5` completado; `P8.6` en construccion para cierre del bloque P8.
+- `P9.1` completado; `P9.2` en construccion para definir el siguiente incremento funcional.
