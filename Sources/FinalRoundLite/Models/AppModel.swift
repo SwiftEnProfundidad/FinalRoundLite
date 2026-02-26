@@ -464,15 +464,15 @@ extension AppModel {
         var displayText: String {
             switch self {
             case .idle:
-                return "Idle"
+                return "Listo"
             case .starting:
-                return "Starting"
+                return "Iniciando"
             case .analyzing:
                 return "Analizando"
             case .listening:
-                return "Listening"
+                return "Escuchando"
             case .stopping:
-                return "Stopping"
+                return "Deteniendo"
             case .error:
                 return "Error"
             }
