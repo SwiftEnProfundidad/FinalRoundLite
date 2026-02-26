@@ -120,9 +120,23 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P8.5` Operativa de limpieza de historial:
   - accion de borrado de una sesion y limpieza total con confirmacion.
   - actualizar tests y smoke para cubrir nuevas acciones de historial.
-- `🚧` `P8.6` Cierre del bloque P8:
+- `✅` `P8.6` Cierre del bloque P8:
   - validar PR de continuidad con estado limpio post-cambios.
   - preparar merge del bloque P8 en `develop`.
+
+## P9 (post P8)
+- `✅` `P9.1` Arranque de nuevo ciclo:
+  - dejar rama de continuidad creada desde `develop` post-merge.
+  - consolidar tracking inicial del nuevo ciclo para la siguiente implementacion.
+- `✅` `P9.2` Definicion del siguiente incremento funcional:
+  - concretar el siguiente bloque de trabajo tras cierre del paquete P8.
+  - priorizar tareas implementables del nuevo ciclo.
+- `✅` `P9.3` Borrado rapido desde panel:
+  - permitir borrar sesiones recientes desde el bloque de historial rapido en menubar.
+  - mantener confirmacion destructiva antes de borrar.
+- `🚧` `P9.4` Operativa de cierre del ciclo P9:
+  - validar estado remoto de la PR de continuidad tras los cambios P9.
+  - consolidar merge del ciclo cuando plataforma este en estado limpio.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

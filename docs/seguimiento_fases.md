@@ -82,4 +82,8 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P8.3` historial rapido en panel menubar (ultimas sesiones + apertura directa desde panel).
 - `✅` Implementar `P8.4` filtro de historial en Settings (busqueda local por texto en archivo/fecha).
 - `✅` Implementar `P8.5` operativa de limpieza de historial (borrado puntual/total con confirmacion y smoke).
-- `🚧` Implementar `P8.6` cierre del bloque P8 (validacion remota y preparacion de merge).
+- `✅` Implementar `P8.6` cierre del bloque P8 (validacion remota + merge en plataforma).
+- `✅` Implementar `P9.1` arranque de nuevo ciclo (rama de continuidad y tracking inicial).
+- `✅` Implementar `P9.2` definicion del siguiente incremento funcional post-P8.
+- `✅` Implementar `P9.3` borrado rapido desde panel menubar con confirmacion.
+- `🚧` Implementar `P9.4` operativa de cierre del ciclo P9 (estado remoto + merge).
