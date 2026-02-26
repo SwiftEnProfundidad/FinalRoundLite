@@ -59,9 +59,14 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P3.6` Cierre operacional del ciclo:
   - consolidar checklist final de release local como paso de handoff obligatorio.
   - mantener actualizacion de evidencia (gate/smoke/close checklist) por commit de entrega.
-- `🚧` `P3.7` Handoff final de entrega:
+- `✅` `P3.7` Handoff final de entrega:
   - consolidar comando unico de handoff en documentacion de cierre.
   - mantener salida de handoff como resumen operativo para entrega al siguiente turno.
+
+## P4 (iteracion UX/UI)
+- `🚧` `P4.1` Checkpoint de UI/UX visual:
+  - preparar un corte de UI funcional del panel para revision visual guiada.
+  - validar jerarquia visual y legibilidad de estados antes de ajustes de estilo.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

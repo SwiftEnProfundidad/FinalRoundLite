@@ -65,4 +65,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P3.4` endurecimiento operativo del ciclo local de release y evidencia.
 - `✅` Implementar `P3.5` operativa de cierre de release local con secuencia canonica final.
 - `✅` Implementar `P3.6` cierre operacional del ciclo local de release y handoff.
-- `🚧` Implementar `P3.7` handoff final de entrega con comando unico obligatorio.
+- `✅` Implementar `P3.7` handoff final de entrega con comando unico obligatorio.
+- `🚧` Implementar `P4.1` checkpoint UI/UX visual del panel para revision guiada.

@@ -7,6 +7,8 @@ GATE_EVIDENCE_FILE="$SMOKE_DIR/release_local_gate.txt"
 SMOKE_EVIDENCE_FILE="$SMOKE_DIR/qa_smoke_last_run.txt"
 CLOSE_EVIDENCE_FILE="$SMOKE_DIR/release_close_checklist.txt"
 HANDOFF_EVIDENCE_FILE="$SMOKE_DIR/release_handoff_local.txt"
+HANDOFF_MARKDOWN_FILE="$SMOKE_DIR/release_handoff_local.md"
+RUN_AT_UTC="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 echo "[P3.6] Ejecutar cierre operativo obligatorio"
 bash "$ROOT_DIR/scripts/release_close_checklist.sh"
@@ -35,6 +37,7 @@ close_commit="$(grep '^head_commit=' "$CLOSE_EVIDENCE_FILE" | cut -d'=' -f2- || 
 gate_run_at="$(grep '^run_at_utc=' "$GATE_EVIDENCE_FILE" | cut -d'=' -f2- || true)"
 smoke_run_at="$(grep '^run_at_utc=' "$SMOKE_EVIDENCE_FILE" | cut -d'=' -f2- || true)"
 close_status="$(grep '^release_close_checklist=' "$CLOSE_EVIDENCE_FILE" | cut -d'=' -f2- || true)"
+close_run_at="$(grep '^gate_run_at_utc=' "$CLOSE_EVIDENCE_FILE" | cut -d'=' -f2- || true)"
 
 if [[ "$gate_commit" != "$head_commit" ]]; then
   echo "ERROR: gate commit ($gate_commit) no coincide con HEAD ($head_commit)" >&2
@@ -58,18 +61,39 @@ fi
 
 {
   echo "release_handoff_local=OK"
+  echo "handoff_mode=single_command"
+  echo "run_at_utc=$RUN_AT_UTC"
   echo "branch=$branch_name"
   echo "commit=$head_commit"
   echo "gate_run_at_utc=$gate_run_at"
   echo "smoke_run_at_utc=$smoke_run_at"
-  echo "mandatory_step_1=bash scripts/release_local.sh"
-  echo "mandatory_step_2=bash scripts/release_gate_status.sh"
-  echo "mandatory_step_3=bash scripts/release_close_checklist.sh"
+  echo "close_run_at_utc=$close_run_at"
   echo "handoff_command=bash scripts/release_handoff_local.sh"
+  echo "internal_step_1=bash scripts/release_local.sh"
+  echo "internal_step_2=bash scripts/release_gate_status.sh"
+  echo "internal_step_3=bash scripts/release_close_checklist.sh"
   echo "gate_evidence_file=$GATE_EVIDENCE_FILE"
   echo "smoke_evidence_file=$SMOKE_EVIDENCE_FILE"
   echo "close_evidence_file=$CLOSE_EVIDENCE_FILE"
 } >"$HANDOFF_EVIDENCE_FILE"
 
+{
+  echo "# Release Handoff Local"
+  echo
+  echo "- status: OK"
+  echo "- mode: single-command"
+  echo "- run_at_utc: $RUN_AT_UTC"
+  echo "- branch: $branch_name"
+  echo "- commit: $head_commit"
+  echo "- canonical_command: \`bash scripts/release_handoff_local.sh\`"
+  echo "- gate_run_at_utc: $gate_run_at"
+  echo "- smoke_run_at_utc: $smoke_run_at"
+  echo "- close_run_at_utc: $close_run_at"
+  echo "- gate_evidence_file: \`$GATE_EVIDENCE_FILE\`"
+  echo "- smoke_evidence_file: \`$SMOKE_EVIDENCE_FILE\`"
+  echo "- close_evidence_file: \`$CLOSE_EVIDENCE_FILE\`"
+} >"$HANDOFF_MARKDOWN_FILE"
+
 echo "RELEASE_HANDOFF_LOCAL_OK"
 echo " - handoff summary: $HANDOFF_EVIDENCE_FILE"
+echo " - handoff markdown: $HANDOFF_MARKDOWN_FILE"

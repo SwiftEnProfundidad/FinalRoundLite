@@ -69,6 +69,10 @@ cd Developer/Projects/FinalRoundLite
 bash scripts/release_handoff_local.sh
 ```
 
+Este es el comando unico de handoff de entrega. Internamente ejecuta la secuencia completa de cierre y deja resumen operativo en:
+- `build/smoke/release_handoff_local.txt`
+- `build/smoke/release_handoff_local.md`
+
 ## Uso
 
 1. Abre `Settings` y pega tu `OPENAI_API_KEY`.
