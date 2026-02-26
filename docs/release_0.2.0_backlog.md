@@ -92,9 +92,14 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P6.2` Ejecucion de publicacion remota:
   - sincronizar con remoto y resolver integracion de branch.
   - publicar branch actualizado y dejar listo el flujo de PR/entrega.
-- `🚧` `P6.3` Cierre de entrega en plataforma:
+- `✅` `P6.3` Cierre de entrega en plataforma:
   - revisar estado de PR/merge en GitHub.
   - cerrar handoff final de turno con enlace al estado remoto.
+
+## P7 (post entrega)
+- `🚧` `P7.1` Espera activa de revision:
+  - monitorizar feedback de PR y checks remotos.
+  - preparar respuesta rapida a comentarios o ajustes de merge.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

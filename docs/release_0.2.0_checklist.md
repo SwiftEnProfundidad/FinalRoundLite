@@ -161,5 +161,14 @@ Ultima actualizacion: 2026-02-25
   - comando: `git push origin feature/p1-2-usabilidad`
   - resultado: `feature/p1-2-usabilidad` actualizado en `origin`.
 
+## 15) Cierre en plataforma (P6.3)
+- `✅` Pull Request de entrega abierta:
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/3`
+  - estado: `OPEN`
+  - merge_state_status: `CLEAN`
+  - base/head: `develop <- feature/p1-2-usabilidad`
+- `✅` Handoff final de turno preparado:
+  - branch publicado y documentacion de release candidate actualizada.
+
 ## Estado actual
-- `P6.2` completado; branch publicado en remoto con evidencia de handoff local en verde.
+- `P6.3` completado; PR de entrega abierta y lista para revision.

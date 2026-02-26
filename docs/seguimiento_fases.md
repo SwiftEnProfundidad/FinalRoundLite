@@ -74,4 +74,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P5.2` cierre de release candidate tecnico (evidencia final en HEAD + handoff de entrega).
 - `✅` Implementar `P6.1` preparacion de entrega final (push/merge + handoff al siguiente turno).
 - `✅` Implementar `P6.2` ejecucion de publicacion remota (sincronizacion + push de branch).
-- `🚧` Implementar `P6.3` cierre de entrega en plataforma (estado PR/merge + handoff final).
+- `✅` Implementar `P6.3` cierre de entrega en plataforma (estado PR/merge + handoff final).
+- `🚧` Implementar `P7.1` espera activa de revision (feedback PR + ajustes de merge).
