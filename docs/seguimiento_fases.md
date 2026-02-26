@@ -72,4 +72,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P4.4` pulido final de demo UX (copy + consistencia visual).
 - `✅` Implementar `P5.1` cierre de release candidate UX (QA visual + smoke local final).
 - `✅` Implementar `P5.2` cierre de release candidate tecnico (evidencia final en HEAD + handoff de entrega).
-- `🚧` Implementar `P6.1` preparacion de entrega final (push/merge + handoff al siguiente turno).
+- `✅` Implementar `P6.1` preparacion de entrega final (push/merge + handoff al siguiente turno).
+- `🚧` Implementar `P6.2` ejecucion de publicacion remota (sincronizacion + push de branch).

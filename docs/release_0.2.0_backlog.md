@@ -86,9 +86,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - preparar commit de cierre y resumen operativo final para entrega.
 
 ## P6 (post candidate)
-- `🚧` `P6.1` Preparacion de entrega final:
+- `✅` `P6.1` Preparacion de entrega final:
   - definir estrategia de push/merge y publicacion de branch.
   - cerrar handoff final al siguiente turno con estado de release candidate.
+- `🚧` `P6.2` Ejecucion de publicacion remota:
+  - sincronizar con remoto y resolver integracion de branch.
+  - publicar branch actualizado y dejar listo el flujo de PR/entrega.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

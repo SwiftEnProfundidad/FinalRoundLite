@@ -143,5 +143,12 @@ Ultima actualizacion: 2026-02-25
 - `✅` Resultado de candidate:
   - estado: `READY_FOR_INTERNAL_PRESENTATION`.
 
+## 13) Preparacion de entrega final (P6.1)
+- `✅` Estrategia de entrega documentada:
+  - archivo: `docs/release_candidate_delivery_plan.md`
+  - enfoque: integracion por `merge` (sin reescritura) + validacion final + push.
+- `✅` Resultado:
+  - estado: `DELIVERY_PLAN_READY`.
+
 ## Estado actual
 - `P5.2` completado; release candidate tecnico y UX listos para presentacion interna en este entorno.
