@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct MenuBarPanelView: View {
@@ -352,13 +353,21 @@ struct MenuBarPanelView: View {
     }
 
     private var footer: some View {
-        HStack {
+        HStack(spacing: 8) {
             SettingsLink {
                 Text("Settings")
             }
+            Button("Cerrar panel") {
+                closePanelWindow()
+            }
+            .buttonStyle(.bordered)
+
             Spacer()
-            Text("Tip: ⌘, abre ajustes")
-                .foregroundStyle(.secondary)
+            Button("Salir") {
+                terminateApplication()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
         }
         .font(.caption)
     }
@@ -393,6 +402,18 @@ struct MenuBarPanelView: View {
             return model.shortScript.count > limit ? "\(slice)…" : slice
         }
         return "Sin coach todavia."
+    }
+
+    private func closePanelWindow() {
+        if let keyWindow = NSApplication.shared.keyWindow {
+            keyWindow.performClose(nil)
+            return
+        }
+        NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil)
+    }
+
+    private func terminateApplication() {
+        NSApplication.shared.terminate(nil)
     }
 }
 
