@@ -86,4 +86,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P9.1` arranque de nuevo ciclo (rama de continuidad y tracking inicial).
 - `✅` Implementar `P9.2` definicion del siguiente incremento funcional post-P8.
 - `✅` Implementar `P9.3` borrado rapido desde panel menubar con confirmacion.
-- `🚧` Implementar `P9.4` operativa de cierre del ciclo P9 (estado remoto + merge).
+- `✅` Implementar `P9.4` operativa de cierre del ciclo P9 (estado remoto + merge).
+- `🚧` Implementar `P10.1` arranque de nuevo ciclo post-P9 (rama de continuidad + tracking inicial).

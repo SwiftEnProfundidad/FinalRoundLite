@@ -134,9 +134,14 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P9.3` Borrado rapido desde panel:
   - permitir borrar sesiones recientes desde el bloque de historial rapido en menubar.
   - mantener confirmacion destructiva antes de borrar.
-- `🚧` `P9.4` Operativa de cierre del ciclo P9:
+- `✅` `P9.4` Operativa de cierre del ciclo P9:
   - validar estado remoto de la PR de continuidad tras los cambios P9.
   - consolidar merge del ciclo cuando plataforma este en estado limpio.
+
+## P10 (post P9)
+- `🚧` `P10.1` Arranque de nuevo ciclo post-P9:
+  - crear rama de continuidad desde `develop` post-merge de `P9`.
+  - dejar tracking inicial listo para definir el siguiente incremento funcional.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

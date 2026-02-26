@@ -331,5 +331,25 @@ Ultima actualizacion: 2026-02-26
   - comando: `swift test`
   - resultado: `52 tests, 0 failures`.
 
+## 27) Operativa de cierre del ciclo P9 (P9.4)
+- `✅` Validacion remota del estado de plataforma:
+  - comando: `bash scripts/release_pr_monitor.sh 5`
+  - resultado: `RELEASE_PR_MONITOR_OK`
+  - snapshot: `PR #5 MERGED`, `merge_state_status=UNKNOWN`, `action_required=true (pr_not_open)`.
+- `✅` Confirmacion de merge del ciclo:
+  - comando: `gh pr view 5 --json ...`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/5`
+  - estado: `MERGED`
+  - merged_at: `2026-02-26T23:08:25Z`
+  - merge_commit: `cb494b33e8bfe762f0ba09645c281350c1ed77b6`
+- `✅` Sincronizacion de base post-cierre:
+  - comandos ejecutados:
+    - `git checkout develop`
+    - `git pull --ff-only origin develop`
+  - resultado: `develop` alineada en `cb494b3`.
+- `✅` Arranque de continuidad post-P9:
+  - comando ejecutado: `git checkout -b feature/p10-1-arranque-post-p9`
+  - resultado: rama de continuidad creada para el siguiente bloque.
+
 ## Estado actual
-- `P9.3` completado; `P9.4` en construccion para cierre operativo del ciclo P9.
+- `P9.4` completado; `P10.1` en construccion para arranque del nuevo ciclo post-P9.
