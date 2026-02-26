@@ -130,5 +130,18 @@ Ultima actualizacion: 2026-02-25
   - referencia: `docs/ui_demo_visual_checklist.md`
   - foco validado: copy consistente panel/ajustes, control del panel (`Cerrar panel`/`Salir`) y operativa sin friccion.
 
+## 12) Cierre release candidate tecnico (P5.2)
+- `✅` Regeneracion de evidencia final en nuevo `HEAD`:
+  - comando: `bash scripts/release_handoff_local.sh`
+  - salida: `RELEASE_HANDOFF_LOCAL_OK`.
+- `✅` Evidencia final coherente:
+  - `head_commit=8fe5a76`
+  - `gate_run_at_utc=2026-02-26T21:13:02Z`
+  - `smoke_run_at_utc=2026-02-26T21:13:09Z`
+  - `release_handoff_run_at_utc=2026-02-26T21:13:02Z`
+  - archivo resumen: `build/smoke/release_handoff_local.txt`
+- `✅` Resultado de candidate:
+  - estado: `READY_FOR_INTERNAL_PRESENTATION`.
+
 ## Estado actual
-- `P5.1` completado; release candidate UX listo para presentacion interna en este entorno.
+- `P5.2` completado; release candidate tecnico y UX listos para presentacion interna en este entorno.
