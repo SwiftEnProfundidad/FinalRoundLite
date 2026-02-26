@@ -1,6 +1,6 @@
 # Backlog Priorizado - Release 0.2.0
 
-Fecha de corte: 2026-02-25
+Fecha de corte: 2026-02-26
 
 ## Objetivo
 Publicar `0.2.0` como version usable para practica individual con flujo estable:
@@ -97,9 +97,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - cerrar handoff final de turno con enlace al estado remoto.
 
 ## P7 (post entrega)
-- `🚧` `P7.1` Espera activa de revision:
+- `✅` `P7.1` Espera activa de revision:
   - monitorizar feedback de PR y checks remotos.
   - preparar respuesta rapida a comentarios o ajustes de merge.
+- `🚧` `P7.2` Cierre final de PR:
+  - mantener monitor remoto y resolver feedback en cuanto aparezca.
+  - completar merge de release cuando el estado de plataforma lo permita.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

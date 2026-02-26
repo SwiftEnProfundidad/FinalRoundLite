@@ -1,6 +1,6 @@
 # Seguimiento por fases
 
-Ultima actualizacion: 2026-02-25
+Ultima actualizacion: 2026-02-26
 
 ## Leyenda
 - `✅ Hecho`
@@ -75,4 +75,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P6.1` preparacion de entrega final (push/merge + handoff al siguiente turno).
 - `✅` Implementar `P6.2` ejecucion de publicacion remota (sincronizacion + push de branch).
 - `✅` Implementar `P6.3` cierre de entrega en plataforma (estado PR/merge + handoff final).
-- `🚧` Implementar `P7.1` espera activa de revision (feedback PR + ajustes de merge).
+- `✅` Implementar `P7.1` espera activa de revision (snapshot remoto + monitor de estado PR/checks).
+- `🚧` Implementar `P7.2` cierre final de PR (atencion de feedback y merge cuando aplique).

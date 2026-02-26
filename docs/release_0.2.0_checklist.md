@@ -1,6 +1,6 @@
 # Checklist de Release 0.2.0
 
-Ultima actualizacion: 2026-02-25
+Ultima actualizacion: 2026-02-26
 
 ## 1) Build y salud tecnica (automatizado)
 - `✅` Build release del paquete:
@@ -170,5 +170,20 @@ Ultima actualizacion: 2026-02-25
 - `✅` Handoff final de turno preparado:
   - branch publicado y documentacion de release candidate actualizada.
 
+## 16) Espera activa de revision (P7.1)
+- `✅` Monitor remoto de PR/checks con evidencia:
+  - comando: `bash scripts/release_pr_monitor.sh 3`
+  - salida: `RELEASE_PR_MONITOR_OK`
+  - archivo de evidencia: `build/smoke/release_pr_monitor.txt`
+  - run_at_utc: `2026-02-26T21:58:30Z`
+- `✅` Snapshot actual de plataforma:
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/3`
+  - estado: `OPEN`
+  - merge_state_status: `CLEAN`
+  - checks reportados: `0` (sin checks configurados actualmente)
+  - comments_count: `0`
+  - reviews_count: `1` (comentario automatico sin cambios solicitados)
+  - action_required: `false`
+
 ## Estado actual
-- `P6.3` completado; PR de entrega abierta y lista para revision.
+- `P7.1` completado; `P7.2` en construccion para cierre final de PR.
