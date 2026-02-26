@@ -7,18 +7,14 @@ struct MenuBarPanelView: View {
     @State private var isCoachExpanded = true
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                statusCard
-                controlsCard
-                transcriptCard
-                suggestionCard
-                footer
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+        VStack(alignment: .leading, spacing: 12) {
+            statusCard
+            controlsCard
+            transcriptCard
+            suggestionCard
+            footer
         }
-        .scrollIndicators(.hidden)
+        .padding(12)
         .frame(width: 452)
     }
 
