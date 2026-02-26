@@ -331,5 +331,82 @@ Ultima actualizacion: 2026-02-26
   - comando: `swift test`
   - resultado: `52 tests, 0 failures`.
 
+## 27) Operativa de cierre del ciclo P9 (P9.4)
+- `✅` Validacion remota del estado de plataforma:
+  - comando: `bash scripts/release_pr_monitor.sh 5`
+  - resultado: `RELEASE_PR_MONITOR_OK`
+  - snapshot: `PR #5 MERGED`, `merge_state_status=UNKNOWN`, `action_required=true (pr_not_open)`.
+- `✅` Confirmacion de merge del ciclo:
+  - comando: `gh pr view 5 --json ...`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/5`
+  - estado: `MERGED`
+  - merged_at: `2026-02-26T23:08:25Z`
+  - merge_commit: `cb494b33e8bfe762f0ba09645c281350c1ed77b6`
+- `✅` Sincronizacion de base post-cierre:
+  - comandos ejecutados:
+    - `git checkout develop`
+    - `git pull --ff-only origin develop`
+  - resultado: `develop` alineada en `cb494b3`.
+- `✅` Arranque de continuidad post-P9:
+  - comando ejecutado: `git checkout -b feature/p10-1-arranque-post-p9`
+  - resultado: rama de continuidad creada para el siguiente bloque.
+
+## 28) Arranque de nuevo ciclo post-P9 (P10.1)
+- `✅` Publicacion de rama de continuidad:
+  - comando: `git push -u origin feature/p10-1-arranque-post-p9`
+  - resultado: rama publicada y con tracking remoto activo.
+- `✅` PR de continuidad abierta sobre `develop`:
+  - comando: `gh pr create --base develop --head feature/p10-1-arranque-post-p9 ...`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/6`
+  - estado inicial: `OPEN`.
+- `✅` Monitor operativo del nuevo ciclo:
+  - comando: `bash scripts/release_pr_monitor.sh 6`
+  - resultado: `RELEASE_PR_MONITOR_OK`
+  - snapshot: `PR #6 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
+
+## 29) Definicion del incremento funcional del ciclo P10 (P10.2)
+- `✅` Alcance priorizado del bloque P10:
+  - `P10.3`: ergonomia anti-scroll en panel menubar.
+  - `P10.4`: persistencia de preferencias de visualizacion del panel.
+- `✅` Criterio de ejecucion:
+  - implementar primero mejoras de ergonomia visibles (`P10.3`).
+  - mantener `P10.4` como siguiente paso para continuidad del flujo UX.
+
+## 30) Ergonomia anti-scroll en panel menubar (P10.3)
+- `✅` Colapsado inicial + autoexpansion contextual:
+  - `Transcript` y `Coach` inician colapsados.
+  - autoexpansion cuando llega nuevo contenido de transcript o coach.
+- `✅` Accion rapida de densidad en resultados:
+  - nuevo control `Expandir resultados` / `Contraer resultados` en bloque `Controles`.
+  - sincroniza expansion de transcript y coach en una sola accion.
+- `✅` Reduccion de altura en secciones de lectura:
+  - ajuste de `transcriptSectionHeight` y `coachSectionHeight` para reducir scroll vertical.
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `52 tests, 0 failures`.
+
+## 31) Persistencia de preferencias del panel (P10.4)
+- `✅` Persistencia de estado UI en capa de modelo:
+  - nuevas propiedades en `AppModel`:
+    - `panelCompactMode`
+    - `panelTranscriptExpanded`
+    - `panelCoachExpanded`
+  - guardado automatico al cambiar preferencias.
+- `✅` Store dedicado de preferencias:
+  - nuevo archivo: `Sources/FinalRoundLite/Services/PanelViewPreferencesStore.swift`
+  - contrato: `PanelViewPreferencesStoring`
+  - implementacion: `UserDefaultsPanelViewPreferencesStore`.
+- `✅` Integracion de `MenuBarPanelView` con preferencias persistidas:
+  - controles y expansion conectados a `AppModel` (no estado efimero local).
+  - se mantiene autoexpansion de transcript/coach al recibir contenido nuevo.
+- `✅` Cobertura de tests:
+  - nuevo archivo: `Tests/FinalRoundLiteTests/PanelViewPreferencesStoreTests.swift`
+  - nuevos tests en `AppModelPersistenceTests`:
+    - `testInit_appliesStoredPanelViewPreferences`
+    - `testPanelViewPreferences_changesPersistIntoStore`
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `56 tests, 0 failures`.
+
 ## Estado actual
-- `P9.3` completado; `P9.4` en construccion para cierre operativo del ciclo P9.
+- `P10.4` completado; `P10.5` en construccion para cierre operativo del ciclo P10.

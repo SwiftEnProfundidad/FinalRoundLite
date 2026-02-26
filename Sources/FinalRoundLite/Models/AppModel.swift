@@ -39,6 +39,21 @@ final class AppModel {
     var isLoadingSavedSessions = false
     var panelSavedSessions: [SavedSessionRecord] = []
     var isLoadingPanelSavedSessions = false
+    var panelCompactMode = PanelViewPreferences.default.isCompactMode {
+        didSet {
+            persistPanelViewPreferences()
+        }
+    }
+    var panelTranscriptExpanded = PanelViewPreferences.default.isTranscriptExpanded {
+        didSet {
+            persistPanelViewPreferences()
+        }
+    }
+    var panelCoachExpanded = PanelViewPreferences.default.isCoachExpanded {
+        didSet {
+            persistPanelViewPreferences()
+        }
+    }
     var languageCode = "es"
     var transcriptionModel = "gpt-4o-mini-transcribe"
     var coachModel = "gpt-4o-mini"
@@ -62,6 +77,7 @@ final class AppModel {
     private let sessionStore: any SessionPersisting
     private let telemetryStore: any TelemetryPersisting
     private let persistenceSettingsStore: any SessionPersistenceSettingsStoring
+    private let panelViewPreferencesStore: any PanelViewPreferencesStoring
     private let fileOpener: any FileOpening
     private var lastPersistedFingerprint: String?
     private var customSessionsDirectoryURL: URL?
@@ -71,12 +87,15 @@ final class AppModel {
         sessionStore: (any SessionPersisting)? = nil,
         telemetryStore: (any TelemetryPersisting)? = nil,
         fileOpener: any FileOpening = WorkspaceFileOpener(),
-        persistenceSettingsStore: any SessionPersistenceSettingsStoring = UserDefaultsSessionPersistenceSettingsStore()
+        persistenceSettingsStore: any SessionPersistenceSettingsStoring = UserDefaultsSessionPersistenceSettingsStore(),
+        panelViewPreferencesStore: any PanelViewPreferencesStoring = UserDefaultsPanelViewPreferencesStore()
     ) {
         self.persistenceSettingsStore = persistenceSettingsStore
+        self.panelViewPreferencesStore = panelViewPreferencesStore
         self.fileOpener = fileOpener
 
         let persistenceSettings = persistenceSettingsStore.load()
+        let panelViewPreferences = panelViewPreferencesStore.load()
         let customSessionsDirectoryURL = persistenceSettings.customDirectoryPath.map {
             URL(fileURLWithPath: $0, isDirectory: true)
         }
@@ -84,6 +103,9 @@ final class AppModel {
         self.customSessionsDirectoryURL = customSessionsDirectoryURL
         usesDefaultSessionsDirectory = customSessionsDirectoryURL == nil
         customSessionsDirectoryPath = customSessionsDirectoryURL?.path ?? ""
+        panelCompactMode = panelViewPreferences.isCompactMode
+        panelTranscriptExpanded = panelViewPreferences.isTranscriptExpanded
+        panelCoachExpanded = panelViewPreferences.isCoachExpanded
 
         if let sessionStore {
             self.sessionStore = sessionStore
@@ -515,6 +537,16 @@ final class AppModel {
     private func applyTelemetrySnapshot(_ snapshot: LocalTelemetrySnapshot) {
         telemetrySessionCount = snapshot.sessionCount
         telemetryAverageProcessingSeconds = snapshot.averageProcessingSeconds
+    }
+
+    private func persistPanelViewPreferences() {
+        panelViewPreferencesStore.save(
+            PanelViewPreferences(
+                isCompactMode: panelCompactMode,
+                isTranscriptExpanded: panelTranscriptExpanded,
+                isCoachExpanded: panelCoachExpanded
+            )
+        )
     }
 
     private static let panelSavedSessionsLimit = 4
