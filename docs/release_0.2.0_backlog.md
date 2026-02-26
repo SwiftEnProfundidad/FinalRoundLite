@@ -100,9 +100,14 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P7.1` Espera activa de revision:
   - monitorizar feedback de PR y checks remotos.
   - preparar respuesta rapida a comentarios o ajustes de merge.
-- `🚧` `P7.2` Cierre final de PR:
+- `✅` `P7.2` Cierre final de PR:
   - mantener monitor remoto y resolver feedback en cuanto aparezca.
   - completar merge de release cuando el estado de plataforma lo permita.
+
+## P8 (siguiente ciclo)
+- `🚧` `P8.1` Arranque del siguiente incremento:
+  - sincronizar `develop` local con el estado post-merge.
+  - preparar base de trabajo para el siguiente bloque funcional.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
