@@ -156,9 +156,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - dejar ciclo listo para merge cuando plataforma este limpia.
 
 ## P11 (post P10)
-- `🚧` `P11.1` Arranque de nuevo ciclo post-P10:
+- `✅` `P11.1` Arranque de nuevo ciclo post-P10:
   - dejar rama de continuidad creada desde `develop` post-merge de `P10`.
   - actualizar tracking inicial para preparar el siguiente bloque funcional.
+- `🚧` `P11.2` Definicion del siguiente incremento funcional:
+  - concretar el alcance ejecutable del ciclo P11.
+  - priorizar tareas de implementacion para el siguiente tramo de trabajo.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
