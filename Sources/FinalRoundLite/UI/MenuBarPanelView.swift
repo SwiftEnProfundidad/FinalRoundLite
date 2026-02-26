@@ -4,15 +4,19 @@ struct MenuBarPanelView: View {
     @Bindable var model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            statusCard
-            controlsCard
-            transcriptCard
-            suggestionCard
-            footer
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                statusCard
+                controlsCard
+                transcriptCard
+                suggestionCard
+                footer
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
-        .padding(12)
-        .frame(width: 440)
+        .scrollIndicators(.hidden)
+        .frame(width: 452)
     }
 
     private var statusCard: some View {
@@ -52,27 +56,7 @@ struct MenuBarPanelView: View {
                 .background(.tertiary.opacity(0.5), in: .rect(cornerRadius: 8))
             }
 
-            HStack(spacing: 12) {
-                if let lastTranscriptionAt = model.lastTranscriptionAt {
-                    Label {
-                        Text(lastTranscriptionAt, format: .dateTime.hour().minute())
-                    } icon: {
-                        Image(systemName: "waveform")
-                    }
-                }
-                if let lastSuggestionAt = model.lastSuggestionAt {
-                    Label {
-                        Text(lastSuggestionAt, format: .dateTime.hour().minute())
-                    } icon: {
-                        Image(systemName: "sparkles")
-                    }
-                }
-                if model.lastTranscriptionAt == nil, model.lastSuggestionAt == nil {
-                    Text("Sin actividad reciente")
-                }
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            lastActivityView
 
             if !model.hasAPIKey {
                 banner(
@@ -122,36 +106,7 @@ struct MenuBarPanelView: View {
                 .disabled(model.status.isBusy || model.isListening)
             }
 
-            HStack(spacing: 8) {
-                Button {
-                    Clipboard.copy(model.exportMarkdown())
-                } label: {
-                    Label("Copiar Markdown", systemImage: "doc.on.doc")
-                }
-                .buttonStyle(.bordered)
-                .disabled(!model.hasSessionOutput)
-
-                Button {
-                    Task { @MainActor in
-                        FileExporter.saveMarkdown(
-                            model.exportMarkdown(),
-                            defaultFilename: FileExporter.defaultFilename()
-                        )
-                    }
-                } label: {
-                    Label("Guardar…", systemImage: "square.and.arrow.down")
-                }
-                .buttonStyle(.bordered)
-                .disabled(!model.hasSessionOutput)
-
-                Button {
-                    model.clearSessionOutput()
-                } label: {
-                    Label("Limpiar", systemImage: "trash")
-                }
-                .buttonStyle(.bordered)
-                .disabled(!model.hasSessionOutput)
-            }
+            secondaryActionsView
         }
         .panelCardStyle()
     }
@@ -175,6 +130,7 @@ struct MenuBarPanelView: View {
                     .foregroundStyle(model.transcript.isEmpty ? .secondary : .primary)
                     .padding(.vertical, 2)
             }
+            .scrollIndicators(.hidden)
             .frame(height: 128)
             .padding(10)
             .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
@@ -228,6 +184,7 @@ struct MenuBarPanelView: View {
                 }
                 .padding(.vertical, 2)
             }
+            .scrollIndicators(.hidden)
             .frame(height: 184)
             .padding(10)
             .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
@@ -256,6 +213,93 @@ struct MenuBarPanelView: View {
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(tint.opacity(0.12), in: .rect(cornerRadius: 8))
+    }
+
+    private var lastActivityView: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                activityChips
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                activityChips
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+
+    @ViewBuilder
+    private var activityChips: some View {
+        if let lastTranscriptionAt = model.lastTranscriptionAt {
+            Label {
+                Text(lastTranscriptionAt, format: .dateTime.hour().minute())
+            } icon: {
+                Image(systemName: "waveform")
+            }
+        }
+        if let lastSuggestionAt = model.lastSuggestionAt {
+            Label {
+                Text(lastSuggestionAt, format: .dateTime.hour().minute())
+            } icon: {
+                Image(systemName: "sparkles")
+            }
+        }
+        if model.lastTranscriptionAt == nil, model.lastSuggestionAt == nil {
+            Text("Sin actividad reciente")
+        }
+    }
+
+    private var secondaryActionsView: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) {
+                copyMarkdownButton
+                saveMarkdownButton
+                clearButton
+            }
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    copyMarkdownButton
+                    saveMarkdownButton
+                }
+                clearButton
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private var copyMarkdownButton: some View {
+        Button {
+            Clipboard.copy(model.exportMarkdown())
+        } label: {
+            Label("Copiar Markdown", systemImage: "doc.on.doc")
+        }
+        .buttonStyle(.bordered)
+        .disabled(!model.hasSessionOutput)
+    }
+
+    private var saveMarkdownButton: some View {
+        Button {
+            Task { @MainActor in
+                FileExporter.saveMarkdown(
+                    model.exportMarkdown(),
+                    defaultFilename: FileExporter.defaultFilename()
+                )
+            }
+        } label: {
+            Label("Guardar…", systemImage: "square.and.arrow.down")
+        }
+        .buttonStyle(.bordered)
+        .disabled(!model.hasSessionOutput)
+    }
+
+    private var clearButton: some View {
+        Button {
+            model.clearSessionOutput()
+        } label: {
+            Label("Limpiar", systemImage: "trash")
+        }
+        .buttonStyle(.bordered)
+        .disabled(!model.hasSessionOutput)
     }
 
     private var footer: some View {

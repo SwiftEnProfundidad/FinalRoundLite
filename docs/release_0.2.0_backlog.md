@@ -67,9 +67,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P4.1` Checkpoint de UI/UX visual:
   - preparar un corte de UI funcional del panel para revision visual guiada.
   - validar jerarquia visual y legibilidad de estados antes de ajustes de estilo.
-- `🚧` `P4.2` Ajustes visuales guiados por feedback:
+- `✅` `P4.2` Ajustes visuales guiados por feedback:
   - aplicar iteracion de layout/espaciado/tipografia segun review visual.
   - cerrar detalles de legibilidad final para transcript, coach y estados del panel.
+- `🚧` `P4.3` Cierre visual de menubar para demo:
+  - validar comportamiento del panel en sesiones largas (scroll y densidad de informacion).
+  - ajustar microcopys y botones segun feedback final de UX.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
