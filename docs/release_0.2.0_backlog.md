@@ -148,9 +148,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P10.3` Ergonomia anti-scroll en panel:
   - iniciar transcript y coach en modo colapsado hasta tener contenido relevante.
   - agregar accion rapida para expandir/contraer resultados y reducir altura de secciones.
-- `🚧` `P10.4` Persistencia de preferencias del panel:
+- `✅` `P10.4` Persistencia de preferencias del panel:
   - guardar y restaurar el estado de vista compacta/expansion de resultados entre aperturas.
   - validar cobertura de tests para la nueva serializacion de preferencias.
+- `🚧` `P10.5` Operativa de cierre del ciclo P10:
+  - validar estado remoto de la PR de continuidad con cambios P10.
+  - dejar ciclo listo para merge cuando plataforma este limpia.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

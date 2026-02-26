@@ -385,5 +385,28 @@ Ultima actualizacion: 2026-02-26
   - comando: `swift test`
   - resultado: `52 tests, 0 failures`.
 
+## 31) Persistencia de preferencias del panel (P10.4)
+- `✅` Persistencia de estado UI en capa de modelo:
+  - nuevas propiedades en `AppModel`:
+    - `panelCompactMode`
+    - `panelTranscriptExpanded`
+    - `panelCoachExpanded`
+  - guardado automatico al cambiar preferencias.
+- `✅` Store dedicado de preferencias:
+  - nuevo archivo: `Sources/FinalRoundLite/Services/PanelViewPreferencesStore.swift`
+  - contrato: `PanelViewPreferencesStoring`
+  - implementacion: `UserDefaultsPanelViewPreferencesStore`.
+- `✅` Integracion de `MenuBarPanelView` con preferencias persistidas:
+  - controles y expansion conectados a `AppModel` (no estado efimero local).
+  - se mantiene autoexpansion de transcript/coach al recibir contenido nuevo.
+- `✅` Cobertura de tests:
+  - nuevo archivo: `Tests/FinalRoundLiteTests/PanelViewPreferencesStoreTests.swift`
+  - nuevos tests en `AppModelPersistenceTests`:
+    - `testInit_appliesStoredPanelViewPreferences`
+    - `testPanelViewPreferences_changesPersistIntoStore`
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `56 tests, 0 failures`.
+
 ## Estado actual
-- `P10.3` completado; `P10.4` en construccion para persistencia de preferencias del panel.
+- `P10.4` completado; `P10.5` en construccion para cierre operativo del ciclo P10.

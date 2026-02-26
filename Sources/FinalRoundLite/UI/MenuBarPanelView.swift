@@ -3,9 +3,6 @@ import SwiftUI
 
 struct MenuBarPanelView: View {
     @Bindable var model: AppModel
-    @State private var isCompactMode = false
-    @State private var isTranscriptExpanded = false
-    @State private var isCoachExpanded = false
     @State private var sessionPendingDeletion: SavedSessionRecord?
 
     var body: some View {
@@ -26,12 +23,12 @@ struct MenuBarPanelView: View {
             let hadContent = !oldValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             let hasContent = !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             if !hadContent, hasContent {
-                isTranscriptExpanded = true
+                model.panelTranscriptExpanded = true
             }
         }
         .onChange(of: hasCoachContent) { oldValue, newValue in
             if !oldValue, newValue {
-                isCoachExpanded = true
+                model.panelCoachExpanded = true
             }
         }
         .confirmationDialog("Borrar sesion local", isPresented: isDeleteSessionDialogPresented, titleVisibility: .visible) {
@@ -115,7 +112,7 @@ struct MenuBarPanelView: View {
 
             Toggle("Enviar audio a OpenAI (transcripcion)", isOn: $model.sendAudioToOpenAI)
             Toggle("Modo ahorro (coach menos frecuente)", isOn: $model.lowCostMode)
-            Toggle("Vista compacta", isOn: $isCompactMode)
+            Toggle("Vista compacta", isOn: $model.panelCompactMode)
             Button {
                 setResultsSectionsExpanded(!allResultSectionsExpanded)
             } label: {
@@ -162,19 +159,19 @@ struct MenuBarPanelView: View {
                 Text("\(model.transcript.count) caracteres")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Button(isTranscriptExpanded ? "Ocultar" : "Mostrar") {
-                    isTranscriptExpanded.toggle()
+                Button(model.panelTranscriptExpanded ? "Ocultar" : "Mostrar") {
+                    model.panelTranscriptExpanded.toggle()
                 }
                 .buttonStyle(.borderless)
                 .font(.caption2.weight(.semibold))
             }
 
-            if isTranscriptExpanded {
+            if model.panelTranscriptExpanded {
                 ScrollView {
                     Text(model.transcript.isEmpty ? "Todavia no hay transcript." : model.transcript)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .textSelection(.enabled)
-                        .font(isCompactMode ? .caption : .callout)
+                        .font(model.panelCompactMode ? .caption : .callout)
                         .foregroundStyle(model.transcript.isEmpty ? .secondary : .primary)
                         .padding(.vertical, 2)
                 }
@@ -184,7 +181,7 @@ struct MenuBarPanelView: View {
                 .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
 
                 if transcriptWasTrimmed {
-                    Text("Mostrando solo el tramo mas reciente del transcript.")
+                Text("Mostrando solo el tramo mas reciente del transcript.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -241,14 +238,14 @@ struct MenuBarPanelView: View {
                 Text("Coach (System Design)")
                     .font(.subheadline.bold())
                 Spacer()
-                Button(isCoachExpanded ? "Ocultar" : "Mostrar") {
-                    isCoachExpanded.toggle()
+                Button(model.panelCoachExpanded ? "Ocultar" : "Mostrar") {
+                    model.panelCoachExpanded.toggle()
                 }
                 .buttonStyle(.borderless)
                 .font(.caption2.weight(.semibold))
             }
 
-            if isCoachExpanded {
+            if model.panelCoachExpanded {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
                         if !model.currentQuestion.isEmpty {
@@ -257,7 +254,7 @@ struct MenuBarPanelView: View {
                                     .font(.caption.bold())
                                     .foregroundStyle(.secondary)
                                 Text(model.currentQuestion)
-                                    .font(isCompactMode ? .caption : .callout)
+                                    .font(model.panelCompactMode ? .caption : .callout)
                             }
                         }
 
@@ -267,7 +264,7 @@ struct MenuBarPanelView: View {
                                     .font(.caption.bold())
                                     .foregroundStyle(.secondary)
                                 Text(model.shortScript)
-                                    .font(isCompactMode ? .caption : .callout)
+                                    .font(model.panelCompactMode ? .caption : .callout)
                                     .textSelection(.enabled)
                             }
                         }
@@ -276,26 +273,26 @@ struct MenuBarPanelView: View {
                             TagListView(
                                 title: "Clarificaciones",
                                 items: model.clarifyingQuestions,
-                                isCompact: isCompactMode
+                                isCompact: model.panelCompactMode
                             )
                         }
                         if !model.tradeoffs.isEmpty {
                             TagListView(
                                 title: "Tradeoffs",
                                 items: model.tradeoffs,
-                                isCompact: isCompactMode
+                                isCompact: model.panelCompactMode
                             )
                         }
                         if !model.nextSteps.isEmpty {
                             TagListView(
                                 title: "Siguientes pasos",
                                 items: model.nextSteps,
-                                isCompact: isCompactMode
+                                isCompact: model.panelCompactMode
                             )
                         }
                         if !hasCoachContent {
                             Text("Aun no hay sugerencias. Inicia o importa audio para generar coach.")
-                                .font(isCompactMode ? .caption : .callout)
+                                .font(model.panelCompactMode ? .caption : .callout)
                                 .foregroundStyle(.secondary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -449,15 +446,15 @@ struct MenuBarPanelView: View {
     }
 
     private var allResultSectionsExpanded: Bool {
-        isTranscriptExpanded && isCoachExpanded
+        model.panelTranscriptExpanded && model.panelCoachExpanded
     }
 
     private var transcriptSectionHeight: CGFloat {
-        isCompactMode ? 84 : 116
+        model.panelCompactMode ? 84 : 116
     }
 
     private var coachSectionHeight: CGFloat {
-        isCompactMode ? 132 : 170
+        model.panelCompactMode ? 132 : 170
     }
 
     private var transcriptWasTrimmed: Bool {
@@ -467,7 +464,7 @@ struct MenuBarPanelView: View {
     private var transcriptPreview: String {
         let value = model.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return "Sin transcript todavia." }
-        let limit = isCompactMode ? 90 : 140
+        let limit = model.panelCompactMode ? 90 : 140
         let slice = String(value.prefix(limit))
         return value.count > limit ? "\(slice)…" : slice
     }
@@ -477,7 +474,7 @@ struct MenuBarPanelView: View {
             return "Pregunta: \(model.currentQuestion)"
         }
         if !model.shortScript.isEmpty {
-            let limit = isCompactMode ? 90 : 140
+            let limit = model.panelCompactMode ? 90 : 140
             let slice = String(model.shortScript.prefix(limit))
             return model.shortScript.count > limit ? "\(slice)…" : slice
         }
@@ -536,8 +533,8 @@ struct MenuBarPanelView: View {
     }
 
     private func setResultsSectionsExpanded(_ isExpanded: Bool) {
-        isTranscriptExpanded = isExpanded
-        isCoachExpanded = isExpanded
+        model.panelTranscriptExpanded = isExpanded
+        model.panelCoachExpanded = isExpanded
     }
 
     private func closePanelWindow() {

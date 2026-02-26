@@ -225,6 +225,53 @@ final class AppModelPersistenceTests: XCTestCase {
     }
 
     @MainActor
+    func testInit_appliesStoredPanelViewPreferences() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let panelPreferencesSpy = PanelViewPreferencesStoreSpy(
+            loadedPreferences: PanelViewPreferences(
+                isCompactMode: true,
+                isTranscriptExpanded: true,
+                isCoachExpanded: false
+            )
+        )
+        let model = AppModel(
+            sessionStore: storeSpy,
+            telemetryStore: telemetrySpy,
+            panelViewPreferencesStore: panelPreferencesSpy
+        )
+
+        XCTAssertTrue(model.panelCompactMode)
+        XCTAssertTrue(model.panelTranscriptExpanded)
+        XCTAssertFalse(model.panelCoachExpanded)
+    }
+
+    @MainActor
+    func testPanelViewPreferences_changesPersistIntoStore() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let panelPreferencesSpy = PanelViewPreferencesStoreSpy()
+        let model = AppModel(
+            sessionStore: storeSpy,
+            telemetryStore: telemetrySpy,
+            panelViewPreferencesStore: panelPreferencesSpy
+        )
+
+        model.panelCompactMode = true
+        model.panelTranscriptExpanded = true
+        model.panelCoachExpanded = true
+
+        XCTAssertEqual(
+            panelPreferencesSpy.savedPreferences.last,
+            PanelViewPreferences(
+                isCompactMode: true,
+                isTranscriptExpanded: true,
+                isCoachExpanded: true
+            )
+        )
+    }
+
+    @MainActor
     func testOpenSavedSessionActions_delegateToFileOpener() {
         let storeSpy = SessionStoreSpy()
         let telemetrySpy = TelemetryStoreSpy()
@@ -426,6 +473,23 @@ private final class SessionPersistenceSettingsStoreSpy: SessionPersistenceSettin
     }
 
     func save(_ settings: SessionPersistenceSettings) {}
+}
+
+private final class PanelViewPreferencesStoreSpy: PanelViewPreferencesStoring {
+    private(set) var savedPreferences: [PanelViewPreferences] = []
+    private let loadedPreferences: PanelViewPreferences
+
+    init(loadedPreferences: PanelViewPreferences = .default) {
+        self.loadedPreferences = loadedPreferences
+    }
+
+    func load() -> PanelViewPreferences {
+        loadedPreferences
+    }
+
+    func save(_ preferences: PanelViewPreferences) {
+        savedPreferences.append(preferences)
+    }
 }
 
 private actor TelemetryStoreSpy: TelemetryPersisting {
