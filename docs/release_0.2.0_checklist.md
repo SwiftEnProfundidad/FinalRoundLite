@@ -187,9 +187,11 @@ Ultima actualizacion: 2026-02-26
 
 ## 17) Cierre final de PR (P7.2)
 - `✅` Cierre en plataforma:
-  - comando objetivo: `gh pr merge 3 --merge`
+  - comando ejecutado: `gh pr merge 3 --merge`
   - precondicion validada con monitor: `action_required=false` y `merge_state_status=CLEAN`.
-  - resultado esperado: PR de entrega integrada en `develop`.
+  - resultado: PR `#3` integrada en `develop`.
+  - merged_at: `2026-02-26T22:05:33Z`
+  - merge_commit: `f17f0a81f6062095dffba7663fd70d4cf00c1d2f`
 
 ## Estado actual
 - `P7.2` completado; `P8.1` en construccion para arranque del siguiente incremento.
