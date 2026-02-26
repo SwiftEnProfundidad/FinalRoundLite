@@ -111,4 +111,62 @@ final class SessionStoreTests: XCTestCase {
         }
         XCTAssertEqual(Set(transcripts), Set(["second", "third"]))
     }
+
+    func testDelete_removesJSONAndMarkdown() async throws {
+        let tempRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("FinalRoundLiteTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: tempRoot, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempRoot) }
+
+        let store = SessionStore(baseDirectoryURL: tempRoot)
+        let session = PersistedSession(
+            savedAt: Date(timeIntervalSince1970: 1_700_000_000),
+            context: ContextCard(),
+            transcript: "to-delete",
+            suggestion: PersistedSuggestion(currentQuestion: "q", shortScript: "s", clarifyingQuestions: [], tradeoffs: [], nextSteps: [])
+        )
+
+        let jsonURL = try await store.save(session: session, retentionLimit: 10)
+        let markdownURL = jsonURL.deletingPathExtension().appendingPathExtension("md")
+        let listed = try await store.listSessions(limit: 10)
+        XCTAssertEqual(listed.count, 1)
+
+        try await store.delete(session: listed[0])
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: jsonURL.path()))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: markdownURL.path()))
+        let remaining = try await store.listSessions(limit: 10)
+        XCTAssertTrue(remaining.isEmpty)
+    }
+
+    func testDeleteAllSessions_removesAllPersistedFiles() async throws {
+        let tempRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("FinalRoundLiteTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: tempRoot, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempRoot) }
+
+        let store = SessionStore(baseDirectoryURL: tempRoot)
+        let first = PersistedSession(
+            savedAt: Date(timeIntervalSince1970: 1_700_000_000),
+            context: ContextCard(),
+            transcript: "first",
+            suggestion: PersistedSuggestion(currentQuestion: "q1", shortScript: "s1", clarifyingQuestions: [], tradeoffs: [], nextSteps: [])
+        )
+        let second = PersistedSession(
+            savedAt: Date(timeIntervalSince1970: 1_700_000_100),
+            context: ContextCard(),
+            transcript: "second",
+            suggestion: PersistedSuggestion(currentQuestion: "q2", shortScript: "s2", clarifyingQuestions: [], tradeoffs: [], nextSteps: [])
+        )
+
+        _ = try await store.save(session: first, retentionLimit: 10)
+        _ = try await store.save(session: second, retentionLimit: 10)
+        let listed = try await store.listSessions(limit: 10)
+        XCTAssertEqual(listed.count, 2)
+
+        try await store.deleteAllSessions()
+
+        let remaining = try await store.listSessions(limit: 10)
+        XCTAssertTrue(remaining.isEmpty)
+    }
 }

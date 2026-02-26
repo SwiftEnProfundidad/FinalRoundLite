@@ -117,9 +117,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P8.4` Filtro de historial en Settings:
   - busqueda por texto para sesiones guardadas.
   - mantener apertura de archivos sin romper flujo actual.
-- `🚧` `P8.5` Operativa de limpieza de historial:
+- `✅` `P8.5` Operativa de limpieza de historial:
   - accion de borrado de una sesion y limpieza total con confirmacion.
   - actualizar tests y smoke para cubrir nuevas acciones de historial.
+- `🚧` `P8.6` Cierre del bloque P8:
+  - validar PR de continuidad con estado limpio post-cambios.
+  - preparar merge del bloque P8 en `develop`.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

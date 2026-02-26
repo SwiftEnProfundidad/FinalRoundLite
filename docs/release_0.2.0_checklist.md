@@ -260,5 +260,34 @@ Ultima actualizacion: 2026-02-26
   - run_at_utc: `2026-02-26T22:26:23Z`
   - resultado: `PR #4 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
 
+## 22) Operativa de limpieza de historial (P8.5)
+- `✅` Operaciones de borrado en persistencia:
+  - `SessionPersisting` amplía contrato con:
+    - `delete(session:)`
+    - `deleteAllSessions()`
+  - `SessionStore` implementa borrado de sesion individual (JSON + Markdown) y limpieza total de archivos `session-*`.
+- `✅` Operativa de borrado en `AppModel`:
+  - acciones nuevas:
+    - `deleteSavedSession(_:)`
+    - `deleteAllSavedSessions()`
+  - sincronizacion de estado tras borrado:
+    - `savedSessions`
+    - `panelSavedSessions`
+- `✅` UI de confirmacion en `Settings`:
+  - boton `Borrar…` por sesion con confirmacion destructiva.
+  - boton `Borrar todo…` con confirmacion destructiva global.
+- `✅` Cobertura de tests y smoke:
+  - `AppModelPersistenceTests`:
+    - `testDeleteSavedSession_removesItemFromModelAndStore`
+    - `testDeleteAllSavedSessions_clearsModelAndStore`
+  - `SessionStoreTests`:
+    - `testDelete_removesJSONAndMarkdown`
+    - `testDeleteAllSessions_removesAllPersistedFiles`
+  - `SmokeFlowTests`:
+    - `testHistoryCleanupFlow_keepsModelStable`
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `52 tests, 0 failures`.
+
 ## Estado actual
-- `P8.4` completado; `P8.5` en construccion para operativa de limpieza de historial.
+- `P8.5` completado; `P8.6` en construccion para cierre del bloque P8.

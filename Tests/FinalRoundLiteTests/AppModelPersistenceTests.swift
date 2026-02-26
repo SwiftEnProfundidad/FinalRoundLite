@@ -265,6 +265,66 @@ final class AppModelPersistenceTests: XCTestCase {
     }
 
     @MainActor
+    func testDeleteSavedSession_removesItemFromModelAndStore() async throws {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-a.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-a.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-b.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-b.md")
+        )
+        await storeSpy.setListedSessions([second, first])
+
+        model.refreshSavedSessions(limit: 10)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        model.deleteSavedSession(second)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        XCTAssertEqual(model.savedSessions, [first])
+        XCTAssertEqual(model.panelSavedSessions, [first])
+        let deletedIDs = await storeSpy.deletedSessionIDs()
+        XCTAssertEqual(deletedIDs, [second.id])
+    }
+
+    @MainActor
+    func testDeleteAllSavedSessions_clearsModelAndStore() async throws {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-a.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-a.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-b.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-b.md")
+        )
+        await storeSpy.setListedSessions([second, first])
+
+        model.refreshSavedSessions(limit: 10)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        model.deleteAllSavedSessions()
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        XCTAssertTrue(model.savedSessions.isEmpty)
+        XCTAssertTrue(model.panelSavedSessions.isEmpty)
+        let deleteAllCount = await storeSpy.deleteAllCallCount()
+        XCTAssertEqual(deleteAllCount, 1)
+    }
+
+    @MainActor
     func testConsumeStopped_updatesTelemetrySnapshot() async throws {
         let storeSpy = SessionStoreSpy()
         let telemetrySpy = TelemetryStoreSpy()
@@ -290,6 +350,8 @@ private actor SessionStoreSpy: SessionPersisting, SessionStoreConfiguring {
     private var retentionLimits: [Int?] = []
     private var listedLimits: [Int] = []
     private var configuredDirectoryURLs: [URL?] = []
+    private var deletedSessionIDsInternal: [String] = []
+    private var deleteAllCalls = 0
 
     func save(session: PersistedSession, retentionLimit: Int?) async throws -> URL {
         sessions.append(session)
@@ -300,6 +362,16 @@ private actor SessionStoreSpy: SessionPersisting, SessionStoreConfiguring {
     func listSessions(limit: Int) async throws -> [SavedSessionRecord] {
         listedLimits.append(limit)
         return Array(sessionsForListing.prefix(limit))
+    }
+
+    func delete(session: SavedSessionRecord) async throws {
+        deletedSessionIDsInternal.append(session.id)
+        sessionsForListing.removeAll { $0.id == session.id }
+    }
+
+    func deleteAllSessions() async throws {
+        deleteAllCalls += 1
+        sessionsForListing.removeAll()
     }
 
     func setBaseDirectoryURL(_ url: URL?) async {
@@ -331,6 +403,14 @@ private actor SessionStoreSpy: SessionPersisting, SessionStoreConfiguring {
             return latest?.path
         }
         return nil
+    }
+
+    func deletedSessionIDs() -> [String] {
+        deletedSessionIDsInternal
+    }
+
+    func deleteAllCallCount() -> Int {
+        deleteAllCalls
     }
 }
 

@@ -4,6 +4,8 @@ struct SettingsView: View {
     @Bindable var model: AppModel
     @State private var apiKeyDraft = ""
     @State private var historySearchQuery = ""
+    @State private var sessionPendingDeletion: SavedSessionRecord?
+    @State private var isConfirmingDeleteAll = false
 
     var body: some View {
         Form {
@@ -84,6 +86,10 @@ struct SettingsView: View {
                     Button("Actualizar") {
                         model.refreshSavedSessions()
                     }
+                    Button("Borrar todo…", role: .destructive) {
+                        isConfirmingDeleteAll = true
+                    }
+                    .disabled(model.savedSessions.isEmpty)
                     if model.isLoadingSavedSessions {
                         ProgressView()
                             .controlSize(.small)
@@ -120,6 +126,9 @@ struct SettingsView: View {
                                 .disabled(session.markdownURL == nil)
                                 Button("Mostrar en Finder") {
                                     model.revealSavedSessionInFinder(session)
+                                }
+                                Button("Borrar…", role: .destructive) {
+                                    sessionPendingDeletion = session
                                 }
                             }
                             .buttonStyle(.bordered)
@@ -158,9 +167,42 @@ struct SettingsView: View {
         .task {
             model.refreshSavedSessions()
         }
+        .confirmationDialog("Borrar sesion local", isPresented: isDeleteSessionDialogPresented, titleVisibility: .visible) {
+            Button("Borrar", role: .destructive) {
+                guard let sessionPendingDeletion else { return }
+                model.deleteSavedSession(sessionPendingDeletion)
+                self.sessionPendingDeletion = nil
+            }
+            Button("Cancelar", role: .cancel) {
+                sessionPendingDeletion = nil
+            }
+        } message: {
+            if let sessionPendingDeletion {
+                Text("Se borrara \(sessionPendingDeletion.jsonURL.lastPathComponent).")
+            }
+        }
+        .confirmationDialog("Borrar todo el historial local", isPresented: $isConfirmingDeleteAll, titleVisibility: .visible) {
+            Button("Borrar todo", role: .destructive) {
+                model.deleteAllSavedSessions()
+            }
+            Button("Cancelar", role: .cancel) {}
+        } message: {
+            Text("Esta accion elimina todos los JSON/Markdown guardados en disco.")
+        }
     }
 
     private var filteredSavedSessions: [SavedSessionRecord] {
         model.filteredSavedSessions(matching: historySearchQuery, limit: 8)
+    }
+
+    private var isDeleteSessionDialogPresented: Binding<Bool> {
+        Binding(
+            get: { sessionPendingDeletion != nil },
+            set: { isPresented in
+                if !isPresented {
+                    sessionPendingDeletion = nil
+                }
+            }
+        )
     }
 }

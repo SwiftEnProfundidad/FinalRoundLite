@@ -311,6 +311,32 @@ final class AppModel {
         }
     }
 
+    func deleteSavedSession(_ session: SavedSessionRecord) {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.sessionStore.delete(session: session)
+                self.savedSessions = try await self.sessionStore.listSessions(limit: self.sessionRetentionLimit)
+                self.panelSavedSessions = Array(self.savedSessions.prefix(Self.panelSavedSessionsLimit))
+            } catch {
+                self.errorMessage = "No se pudo borrar la sesion local: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    func deleteAllSavedSessions() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.sessionStore.deleteAllSessions()
+                self.savedSessions = []
+                self.panelSavedSessions = []
+            } catch {
+                self.errorMessage = "No se pudo borrar el historial local: \(error.localizedDescription)"
+            }
+        }
+    }
+
     private func runtimeSettings() -> RuntimeSettings {
         RuntimeSettings(
             sendAudioToOpenAI: sendAudioToOpenAI,
