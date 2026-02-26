@@ -462,5 +462,22 @@ Ultima actualizacion: 2026-02-26
   - comando: `swift test`
   - resultado: `56 tests, 0 failures`.
 
+## 36) Operativa de cierre del ciclo P11 (P11.4)
+- `✅` Validacion remota previa al merge:
+  - comando: `bash scripts/release_pr_monitor.sh 7`
+  - resultado final de premerge: `PR #7 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
+- `✅` Cierre en plataforma:
+  - comando ejecutado: `gh pr merge 7 --merge`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/7`
+  - estado: `MERGED`
+  - merged_at: `2026-02-26T23:20:26Z`
+  - merge_commit: `c57c250e14bab5f62ad6ebb85af6b97be6ce091a`
+- `✅` Sincronizacion post-merge y continuidad:
+  - comandos ejecutados:
+    - `git checkout develop`
+    - `git pull --ff-only origin develop`
+    - `git checkout -b feature/p12-1-arranque-post-p11`
+  - resultado: `develop` alineada y rama de continuidad creada para el ciclo P12.
+
 ## Estado actual
-- `P11.3` completado; `P11.4` en construccion para cierre operativo del ciclo P11.
+- `P11.4` completado; `P12.1` en construccion para arranque del nuevo ciclo post-P11.
