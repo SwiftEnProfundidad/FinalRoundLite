@@ -150,5 +150,16 @@ Ultima actualizacion: 2026-02-25
 - `✅` Resultado:
   - estado: `DELIVERY_PLAN_READY`.
 
+## 14) Publicacion remota del branch (P6.2)
+- `✅` Integracion remota sin conflictos:
+  - comando: `git fetch origin && git merge --no-edit origin/feature/p1-2-usabilidad`
+  - resultado: merge `ort` exitoso.
+- `✅` Validacion post-merge:
+  - comando: `bash scripts/release_handoff_local.sh`
+  - salida: `RELEASE_HANDOFF_LOCAL_OK` en commit `a8a6355`.
+- `✅` Publicacion remota:
+  - comando: `git push origin feature/p1-2-usabilidad`
+  - resultado: `feature/p1-2-usabilidad` actualizado en `origin`.
+
 ## Estado actual
-- `P5.2` completado; release candidate tecnico y UX listos para presentacion interna en este entorno.
+- `P6.2` completado; branch publicado en remoto con evidencia de handoff local en verde.
