@@ -4,8 +4,8 @@ import SwiftUI
 struct MenuBarPanelView: View {
     @Bindable var model: AppModel
     @State private var isCompactMode = false
-    @State private var isTranscriptExpanded = true
-    @State private var isCoachExpanded = true
+    @State private var isTranscriptExpanded = false
+    @State private var isCoachExpanded = false
     @State private var sessionPendingDeletion: SavedSessionRecord?
 
     var body: some View {
@@ -21,6 +21,18 @@ struct MenuBarPanelView: View {
         .frame(width: 452)
         .task {
             model.refreshPanelSavedSessions()
+        }
+        .onChange(of: model.transcript) { oldValue, newValue in
+            let hadContent = !oldValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            let hasContent = !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            if !hadContent, hasContent {
+                isTranscriptExpanded = true
+            }
+        }
+        .onChange(of: hasCoachContent) { oldValue, newValue in
+            if !oldValue, newValue {
+                isCoachExpanded = true
+            }
         }
         .confirmationDialog("Borrar sesion local", isPresented: isDeleteSessionDialogPresented, titleVisibility: .visible) {
             Button("Borrar", role: .destructive) {
@@ -104,6 +116,16 @@ struct MenuBarPanelView: View {
             Toggle("Enviar audio a OpenAI (transcripcion)", isOn: $model.sendAudioToOpenAI)
             Toggle("Modo ahorro (coach menos frecuente)", isOn: $model.lowCostMode)
             Toggle("Vista compacta", isOn: $isCompactMode)
+            Button {
+                setResultsSectionsExpanded(!allResultSectionsExpanded)
+            } label: {
+                Label(
+                    allResultSectionsExpanded ? "Contraer resultados" : "Expandir resultados",
+                    systemImage: allResultSectionsExpanded ? "rectangle.compress.vertical" : "rectangle.expand.vertical"
+                )
+            }
+            .buttonStyle(.borderless)
+            .font(.caption.weight(.semibold))
 
             HStack(spacing: 8) {
                 Button {
@@ -426,12 +448,16 @@ struct MenuBarPanelView: View {
         .font(.caption)
     }
 
+    private var allResultSectionsExpanded: Bool {
+        isTranscriptExpanded && isCoachExpanded
+    }
+
     private var transcriptSectionHeight: CGFloat {
-        isCompactMode ? 96 : 132
+        isCompactMode ? 84 : 116
     }
 
     private var coachSectionHeight: CGFloat {
-        isCompactMode ? 148 : 198
+        isCompactMode ? 132 : 170
     }
 
     private var transcriptWasTrimmed: Bool {
@@ -507,6 +533,11 @@ struct MenuBarPanelView: View {
                 }
             }
         )
+    }
+
+    private func setResultsSectionsExpanded(_ isExpanded: Bool) {
+        isTranscriptExpanded = isExpanded
+        isCoachExpanded = isExpanded
     }
 
     private func closePanelWindow() {

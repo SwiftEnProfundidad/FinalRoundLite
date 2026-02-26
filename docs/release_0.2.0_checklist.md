@@ -364,5 +364,26 @@ Ultima actualizacion: 2026-02-26
   - resultado: `RELEASE_PR_MONITOR_OK`
   - snapshot: `PR #6 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
 
+## 29) Definicion del incremento funcional del ciclo P10 (P10.2)
+- `✅` Alcance priorizado del bloque P10:
+  - `P10.3`: ergonomia anti-scroll en panel menubar.
+  - `P10.4`: persistencia de preferencias de visualizacion del panel.
+- `✅` Criterio de ejecucion:
+  - implementar primero mejoras de ergonomia visibles (`P10.3`).
+  - mantener `P10.4` como siguiente paso para continuidad del flujo UX.
+
+## 30) Ergonomia anti-scroll en panel menubar (P10.3)
+- `✅` Colapsado inicial + autoexpansion contextual:
+  - `Transcript` y `Coach` inician colapsados.
+  - autoexpansion cuando llega nuevo contenido de transcript o coach.
+- `✅` Accion rapida de densidad en resultados:
+  - nuevo control `Expandir resultados` / `Contraer resultados` en bloque `Controles`.
+  - sincroniza expansion de transcript y coach en una sola accion.
+- `✅` Reduccion de altura en secciones de lectura:
+  - ajuste de `transcriptSectionHeight` y `coachSectionHeight` para reducir scroll vertical.
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `52 tests, 0 failures`.
+
 ## Estado actual
-- `P10.1` completado; `P10.2` en construccion para definir el siguiente incremento funcional.
+- `P10.3` completado; `P10.4` en construccion para persistencia de preferencias del panel.

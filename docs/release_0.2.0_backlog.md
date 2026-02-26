@@ -142,9 +142,15 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P10.1` Arranque de nuevo ciclo post-P9:
   - crear rama de continuidad desde `develop` post-merge de `P9`.
   - dejar tracking inicial listo para definir el siguiente incremento funcional.
-- `🚧` `P10.2` Definicion del siguiente incremento funcional:
+- `✅` `P10.2` Definicion del siguiente incremento funcional:
   - concretar el alcance implementable del bloque P10 tras el arranque de continuidad.
   - priorizar tareas ejecutables para el siguiente tramo de implementacion.
+- `✅` `P10.3` Ergonomia anti-scroll en panel:
+  - iniciar transcript y coach en modo colapsado hasta tener contenido relevante.
+  - agregar accion rapida para expandir/contraer resultados y reducir altura de secciones.
+- `🚧` `P10.4` Persistencia de preferencias del panel:
+  - guardar y restaurar el estado de vista compacta/expansion de resultados entre aperturas.
+  - validar cobertura de tests para la nueva serializacion de preferencias.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.

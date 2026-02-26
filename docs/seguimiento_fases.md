@@ -88,4 +88,6 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P9.3` borrado rapido desde panel menubar con confirmacion.
 - `✅` Implementar `P9.4` operativa de cierre del ciclo P9 (estado remoto + merge).
 - `✅` Implementar `P10.1` arranque de nuevo ciclo post-P9 (rama de continuidad + tracking inicial).
-- `🚧` Implementar `P10.2` definicion del siguiente incremento funcional del ciclo P10.
+- `✅` Implementar `P10.2` definicion del siguiente incremento funcional del ciclo P10.
+- `✅` Implementar `P10.3` ergonomia anti-scroll en panel menubar.
+- `🚧` Implementar `P10.4` persistencia de preferencias del panel.
