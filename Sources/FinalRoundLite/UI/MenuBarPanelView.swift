@@ -60,7 +60,7 @@ struct MenuBarPanelView: View {
 
             if !model.hasAPIKey {
                 banner(
-                    text: "Falta API key: abre Settings para pegar tu OPENAI_API_KEY.",
+                    text: "Falta API key: abre Ajustes para pegar tu OPENAI_API_KEY.",
                     tint: .orange,
                     symbol: "key.fill"
                 )
@@ -355,7 +355,7 @@ struct MenuBarPanelView: View {
     private var footer: some View {
         HStack(spacing: 8) {
             SettingsLink {
-                Text("Settings")
+                Text("Ajustes")
             }
             Button("Cerrar panel") {
                 closePanelWindow()

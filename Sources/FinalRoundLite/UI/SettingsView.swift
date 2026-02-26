@@ -6,7 +6,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("OpenAI") {
+            Section("OpenAI y practica") {
                 SecureField("OPENAI_API_KEY", text: $apiKeyDraft)
                     .textContentType(.password)
 
@@ -15,10 +15,10 @@ struct SettingsView: View {
                         model.saveAPIKey(apiKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines))
                         apiKeyDraft = ""
                     }
-                    Button("Borrar") { model.clearAPIKey() }
+                    Button("Eliminar") { model.clearAPIKey() }
                 }
 
-                Text("El audio se enviara a OpenAI solo si activas el toggle en el panel.")
+                Text("La transcripcion solo se enviara si activas 'Enviar audio a OpenAI (transcripcion)' en el panel.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -28,13 +28,22 @@ struct SettingsView: View {
             }
 
             Section("Modelos") {
-                TextField("Transcription model", text: $model.transcriptionModel)
-                TextField("Coach model", text: $model.coachModel)
-                TextField("Language (ISO-639-1)", text: $model.languageCode)
+                TextField("Modelo de transcripcion", text: $model.transcriptionModel)
+                TextField("Modelo de coach", text: $model.coachModel)
+                TextField("Idioma de transcripcion (ISO-639-1)", text: $model.languageCode)
+            }
+
+            Section("Panel de menubar") {
+                Text("Cierra el panel con 'Cerrar panel' y termina la app con 'Salir'.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Tip: usa 'Vista compacta' en el panel para sesiones largas.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Persistencia local") {
-                Toggle("Guardar sesiones en disco (JSON)", isOn: $model.persistSessionsLocally)
+                Toggle("Guardar sesiones locales en disco (JSON)", isOn: $model.persistSessionsLocally)
                 Text("Desactivado por defecto. Si esta activo, se guarda un JSON por sesion en Application Support.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -71,7 +80,7 @@ struct SettingsView: View {
 
             Section("Historial local") {
                 HStack(spacing: 10) {
-                    Button("Recargar") {
+                    Button("Actualizar") {
                         model.refreshSavedSessions()
                     }
                     if model.isLoadingSavedSessions {

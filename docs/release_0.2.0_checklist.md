@@ -105,5 +105,12 @@ Ultima actualizacion: 2026-02-25
   - `commit=9a5d222`
   - `handoff_command=bash scripts/release_handoff_local.sh`
 
+## 10) Checklist visual de demo UX (P4.4)
+- `✅` Checklist visual corta documentada:
+  - archivo: `docs/ui_demo_visual_checklist.md`
+  - objetivo: validar jerarquia visual, legibilidad, sesiones largas y control del panel.
+- `✅` Resultado actual:
+  - estado: `OK para demo interna`.
+
 ## Estado actual
 - `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.

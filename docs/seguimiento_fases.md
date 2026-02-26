@@ -69,4 +69,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P4.1` checkpoint UI/UX visual del panel para revision guiada.
 - `✅` Implementar `P4.2` ajustes visuales guiados por feedback de revision UI/UX.
 - `✅` Implementar `P4.3` cierre visual de menubar para demo con feedback final de UX.
-- `🚧` Implementar `P4.4` pulido final de demo UX (copy + consistencia visual).
+- `✅` Implementar `P4.4` pulido final de demo UX (copy + consistencia visual).
+- `🚧` Implementar `P5.1` cierre de release candidate UX (QA visual + smoke local final).
