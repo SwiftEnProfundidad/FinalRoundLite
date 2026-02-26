@@ -8,11 +8,24 @@ struct OpenAIClient {
         case apiError(String)
     }
 
+    typealias DataLoader = @Sendable (URLRequest) async throws -> (Data, URLResponse)
+
     let apiKey: String
-    var baseURL = URL(string: "https://api.openai.com/v1")!
+    var baseURL = URL(string: "https://api.openai.com/v1/")!
     var urlSession: URLSession = .shared
+    var dataLoader: DataLoader?
 
     func createTranscription(wavData: Data, model: String, language: String?) async throws -> String {
+        try await createTranscription(
+            audioData: wavData,
+            filename: "audio.wav",
+            contentType: "audio/wav",
+            model: model,
+            language: language
+        )
+    }
+
+    func createTranscription(audioData: Data, filename: String, contentType: String, model: String, language: String?) async throws -> String {
         guard let url = URL(string: "audio/transcriptions", relativeTo: baseURL) else {
             throw ClientError.invalidURL
         }
@@ -25,7 +38,15 @@ struct OpenAIClient {
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         var body = Data()
-        body.append(multipart(boundary: boundary, name: "file", filename: "audio.wav", contentType: "audio/wav", data: wavData))
+        body.append(
+            multipart(
+                boundary: boundary,
+                name: "file",
+                filename: filename,
+                contentType: contentType,
+                data: audioData
+            )
+        )
         body.append(multipart(boundary: boundary, name: "model", value: model))
         body.append(multipart(boundary: boundary, name: "response_format", value: "json"))
         if let language, !language.isEmpty {
@@ -35,7 +56,7 @@ struct OpenAIClient {
 
         request.httpBody = body
 
-        let (data, response) = try await urlSession.data(for: request)
+        let (data, response) = try await loadData(for: request)
         try validateHTTP(response: response, data: data)
 
         struct TranscriptionResponse: Decodable { let text: String }
@@ -74,7 +95,7 @@ struct OpenAIClient {
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
 
-        let (data, response) = try await urlSession.data(for: request)
+        let (data, response) = try await loadData(for: request)
         try validateHTTP(response: response, data: data)
 
         let envelope = try JSONDecoder().decode(ResponseEnvelope.self, from: data)
@@ -101,6 +122,13 @@ struct OpenAIClient {
             let error: APIError?
         }
         return (try? JSONDecoder().decode(ErrorEnvelope.self, from: data))?.error?.message
+    }
+
+    private func loadData(for request: URLRequest) async throws -> (Data, URLResponse) {
+        if let dataLoader {
+            return try await dataLoader(request)
+        }
+        return try await urlSession.data(for: request)
     }
 
     private func multipart(boundary: String, name: String, value: String) -> Data {
@@ -147,4 +175,3 @@ struct ResponseEnvelope: Decodable {
         return texts.joined(separator: "\n")
     }
 }
-

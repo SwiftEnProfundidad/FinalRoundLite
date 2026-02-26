@@ -21,6 +21,20 @@ final class AppModel {
     var sendAudioToOpenAI = false
     var lowCostMode = false
     var persistSessionsLocally = false
+    var sessionRetentionLimit = SessionPersistenceSettings.default.retentionLimit {
+        didSet {
+            if sessionRetentionLimit < 1 {
+                sessionRetentionLimit = 1
+                return
+            }
+            persistSessionPersistenceSettings()
+            refreshSavedSessions()
+        }
+    }
+    var customSessionsDirectoryPath = ""
+    var usesDefaultSessionsDirectory = true
+    var telemetrySessionCount = 0
+    var telemetryAverageProcessingSeconds = 0.0
     var savedSessions: [SavedSessionRecord] = []
     var isLoadingSavedSessions = false
     var languageCode = "es"
@@ -44,15 +58,48 @@ final class AppModel {
     private let keychain = KeychainStore()
     private let coordinator = AppCoordinator()
     private let sessionStore: any SessionPersisting
+    private let telemetryStore: any TelemetryPersisting
+    private let persistenceSettingsStore: any SessionPersistenceSettingsStoring
     private let fileOpener: any FileOpening
     private var lastPersistedFingerprint: String?
+    private var customSessionsDirectoryURL: URL?
+    private var sessionStartedAt: Date?
 
     init(
-        sessionStore: any SessionPersisting = SessionStore(),
-        fileOpener: any FileOpening = WorkspaceFileOpener()
+        sessionStore: (any SessionPersisting)? = nil,
+        telemetryStore: (any TelemetryPersisting)? = nil,
+        fileOpener: any FileOpening = WorkspaceFileOpener(),
+        persistenceSettingsStore: any SessionPersistenceSettingsStoring = UserDefaultsSessionPersistenceSettingsStore()
     ) {
-        self.sessionStore = sessionStore
+        self.persistenceSettingsStore = persistenceSettingsStore
         self.fileOpener = fileOpener
+
+        let persistenceSettings = persistenceSettingsStore.load()
+        let customSessionsDirectoryURL = persistenceSettings.customDirectoryPath.map {
+            URL(fileURLWithPath: $0, isDirectory: true)
+        }
+        sessionRetentionLimit = max(1, persistenceSettings.retentionLimit)
+        self.customSessionsDirectoryURL = customSessionsDirectoryURL
+        usesDefaultSessionsDirectory = customSessionsDirectoryURL == nil
+        customSessionsDirectoryPath = customSessionsDirectoryURL?.path ?? ""
+
+        if let sessionStore {
+            self.sessionStore = sessionStore
+        } else {
+            self.sessionStore = SessionStore(baseDirectoryURL: customSessionsDirectoryURL)
+        }
+        if let telemetryStore {
+            self.telemetryStore = telemetryStore
+        } else {
+            self.telemetryStore = LocalTelemetryStore()
+        }
+
+        Task { [sessionStore = self.sessionStore, customSessionsDirectoryURL] in
+            guard let configurable = sessionStore as? any SessionStoreConfiguring else { return }
+            await configurable.setBaseDirectoryURL(customSessionsDirectoryURL)
+        }
+
+        refreshTelemetrySnapshot()
     }
 
     func start() {
@@ -169,13 +216,32 @@ final class AppModel {
         lastPersistedFingerprint = nil
     }
 
-    func refreshSavedSessions(limit: Int = 12) {
+    func chooseSessionsDirectory() {
+        SessionDirectoryPicker.pickDirectory { [weak self] selectedURL in
+            guard let self, let selectedURL else { return }
+            self.applyCustomSessionsDirectory(selectedURL)
+        }
+    }
+
+    func resetSessionsDirectoryToDefault() {
+        applyCustomSessionsDirectory(nil)
+    }
+
+    func revealSessionsDirectoryInFinder() {
+        let directory = resolvedSessionsDirectoryURL()
+        if !fileOpener.open(directory) {
+            errorMessage = "No se pudo abrir la carpeta de sesiones."
+        }
+    }
+
+    func refreshSavedSessions(limit: Int? = nil) {
         isLoadingSavedSessions = true
+        let effectiveLimit = max(1, limit ?? sessionRetentionLimit)
 
         Task { [weak self] in
             guard let self else { return }
             do {
-                self.savedSessions = try await self.sessionStore.listSessions(limit: limit)
+                self.savedSessions = try await self.sessionStore.listSessions(limit: effectiveLimit)
             } catch {
                 self.errorMessage = "No se pudo cargar historial local: \(error.localizedDescription)"
             }
@@ -221,12 +287,19 @@ final class AppModel {
         case .started:
             status = .listening
             errorMessage = nil
+            if sessionStartedAt == nil {
+                sessionStartedAt = .now
+            }
         case .stopped:
             status = .idle
             isListening = false
+            recordTelemetryIfNeeded()
             persistSessionIfNeeded()
         case let .statusChanged(newStatus):
             status = newStatus
+            if newStatus == .analyzing, sessionStartedAt == nil {
+                sessionStartedAt = .now
+            }
         case let .error(message):
             errorMessage = message
             status = .error
@@ -284,13 +357,98 @@ final class AppModel {
         Task { [weak self] in
             guard let self else { return }
             do {
-                _ = try await self.sessionStore.save(session: session)
+                _ = try await self.sessionStore.save(
+                    session: session,
+                    retentionLimit: sessionRetentionLimit
+                )
                 self.lastPersistedFingerprint = fingerprint
-                self.savedSessions = try await self.sessionStore.listSessions(limit: 12)
+                self.savedSessions = try await self.sessionStore.listSessions(limit: sessionRetentionLimit)
             } catch {
                 self.errorMessage = "No se pudo guardar la sesion local: \(error.localizedDescription)"
             }
         }
+    }
+
+    private func applyCustomSessionsDirectory(_ directoryURL: URL?) {
+        customSessionsDirectoryURL = directoryURL
+        usesDefaultSessionsDirectory = directoryURL == nil
+        customSessionsDirectoryPath = directoryURL?.path ?? ""
+        persistSessionPersistenceSettings()
+        updateSessionStoreDirectory()
+        refreshSavedSessions()
+    }
+
+    private func persistSessionPersistenceSettings() {
+        persistenceSettingsStore.save(
+            SessionPersistenceSettings(
+                customDirectoryPath: customSessionsDirectoryURL?.path,
+                retentionLimit: sessionRetentionLimit
+            )
+        )
+    }
+
+    private func updateSessionStoreDirectory() {
+        Task { [sessionStore, customSessionsDirectoryURL] in
+            guard let configurable = sessionStore as? any SessionStoreConfiguring else { return }
+            await configurable.setBaseDirectoryURL(customSessionsDirectoryURL)
+        }
+    }
+
+    private func resolvedSessionsDirectoryURL() -> URL {
+        if let customSessionsDirectoryURL {
+            return customSessionsDirectoryURL
+        }
+        let applicationSupportURL = (try? FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )) ?? FileManager.default.homeDirectoryForCurrentUser
+        return applicationSupportURL
+            .appendingPathComponent("FinalRoundLite", isDirectory: true)
+            .appendingPathComponent("sessions", isDirectory: true)
+    }
+
+    private func recordTelemetryIfNeeded() {
+        guard let sessionStartedAt else { return }
+        self.sessionStartedAt = nil
+
+        let transcriptTrimmed = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasSuggestion = !currentQuestion.isEmpty ||
+            !shortScript.isEmpty ||
+            !clarifyingQuestions.isEmpty ||
+            !tradeoffs.isEmpty ||
+            !nextSteps.isEmpty
+        guard !transcriptTrimmed.isEmpty || hasSuggestion else { return }
+
+        let processingSeconds = max(0, Date().timeIntervalSince(sessionStartedAt))
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.telemetryStore.recordSession(processingSeconds: processingSeconds)
+                let snapshot = try await self.telemetryStore.snapshot()
+                self.applyTelemetrySnapshot(snapshot)
+            } catch {
+                self.errorMessage = "No se pudo actualizar telemetria local: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func refreshTelemetrySnapshot() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let snapshot = try await self.telemetryStore.snapshot()
+                self.applyTelemetrySnapshot(snapshot)
+            } catch {
+                self.errorMessage = "No se pudo leer telemetria local: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func applyTelemetrySnapshot(_ snapshot: LocalTelemetrySnapshot) {
+        telemetrySessionCount = snapshot.sessionCount
+        telemetryAverageProcessingSeconds = snapshot.averageProcessingSeconds
     }
 }
 
@@ -306,15 +464,15 @@ extension AppModel {
         var displayText: String {
             switch self {
             case .idle:
-                return "Idle"
+                return "Listo"
             case .starting:
-                return "Starting"
+                return "Iniciando"
             case .analyzing:
                 return "Analizando"
             case .listening:
-                return "Listening"
+                return "Escuchando"
             case .stopping:
-                return "Stopping"
+                return "Deteniendo"
             case .error:
                 return "Error"
             }

@@ -22,10 +22,68 @@ bash scripts/build_app.sh
 open build/FinalRoundLite.app
 ```
 
+## QA Smoke Automatizado
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/qa_smoke_flows.sh
+```
+
+## Gate Canonico de Release Local
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_local.sh
+```
+
+`scripts/release_local.sh` es el comando canonico de validacion local: ejecuta tests completos, build release y smoke automatizado con verificacion de evidencia.
+
+Para visibilidad operativa de evidencia del ultimo run:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_gate_status.sh
+```
+
+## Cierre Final de Release Local
+
+Ruta minima de validacion final previa a entrega:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_local.sh
+bash scripts/release_gate_status.sh
+```
+
+Ejecucion estandarizada de checklist final de cierre:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_close_checklist.sh
+```
+
+Handoff operativo obligatorio por commit de entrega:
+
+```bash
+cd Developer/Projects/FinalRoundLite
+bash scripts/release_handoff_local.sh
+```
+
+Este es el comando unico de handoff de entrega. Internamente ejecuta la secuencia completa de cierre y deja resumen operativo en:
+- `build/smoke/release_handoff_local.txt`
+- `build/smoke/release_handoff_local.md`
+
 ## Uso
 
 1. Abre `Settings` y pega tu `OPENAI_API_KEY`.
 2. En el panel, activa `Enviar audio a OpenAI`.
 3. Pulsa `Start` y habla.
 4. Copia o guarda el Markdown con el transcript + sugerencias.
+5. Opcional: pulsa `Importar audio` para analizar un archivo sin captura en vivo (wav, mp3, mpga, mpeg, m4a, mp4, webm, ogg; maximo 25 MB).
+6. Opcional: activa en `Settings` la persistencia local para guardar cada sesion como JSON; tambien puedes elegir carpeta destino y retencion maxima.
+7. En `Settings`, revisa la telemetria local no sensible (contador de sesiones y promedio de procesamiento).
 
+## Roadmap
+
+- Backlog priorizado de `0.2.0`: `docs/release_0.2.0_backlog.md`
+- Checklist de release `0.2.0`: `docs/release_0.2.0_checklist.md`

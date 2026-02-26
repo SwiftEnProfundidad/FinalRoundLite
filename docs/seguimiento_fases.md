@@ -1,6 +1,6 @@
 # Seguimiento por fases
 
-Ultima actualizacion: 2026-02-25
+Ultima actualizacion: 2026-02-26
 
 ## Leyenda
 - `✅ Hecho`
@@ -56,4 +56,25 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Auditoria y correccion de cumplimiento de skills iOS prioritarias (`windsurf-rules-ios`, `swift-concurrency`, `swiftui-expert-skill`) en codigo y tests.
 - `✅` Implementar `P1.1` Historial local minimo (listar sesiones guardadas y abrir JSON/Markdown desde la app).
 - `✅` Implementar `P1.2` mejoras de usabilidad (limpieza explicita y estado "analizando").
-- `🚧` Implementar `P2.1` ajustes avanzados (carpeta de persistencia y retencion configurable).
+- `✅` Implementar `P2.1` ajustes avanzados (carpeta de persistencia y retencion configurable).
+- `✅` Implementar `P2.2` telemetria local no sensible (contador de sesiones y tiempo de procesamiento promedio).
+- `✅` Implementar `P2.3` eliminacion de `@preconcurrency` en `AudioCaptureService` con validacion en Swift 6.2 strict concurrency.
+- `✅` Implementar `P3.1` QA automatizado de flujos clave (start/stop, importacion, export markdown).
+- `✅` Implementar `P3.2` evidencia automatizada de smoke en ciclo de release local.
+- `✅` Implementar `P3.3` endurecimiento del gate local de entrega con comando canonico de release.
+- `✅` Implementar `P3.4` endurecimiento operativo del ciclo local de release y evidencia.
+- `✅` Implementar `P3.5` operativa de cierre de release local con secuencia canonica final.
+- `✅` Implementar `P3.6` cierre operacional del ciclo local de release y handoff.
+- `✅` Implementar `P3.7` handoff final de entrega con comando unico obligatorio.
+- `✅` Implementar `P4.1` checkpoint UI/UX visual del panel para revision guiada.
+- `✅` Implementar `P4.2` ajustes visuales guiados por feedback de revision UI/UX.
+- `✅` Implementar `P4.3` cierre visual de menubar para demo con feedback final de UX.
+- `✅` Implementar `P4.4` pulido final de demo UX (copy + consistencia visual).
+- `✅` Implementar `P5.1` cierre de release candidate UX (QA visual + smoke local final).
+- `✅` Implementar `P5.2` cierre de release candidate tecnico (evidencia final en HEAD + handoff de entrega).
+- `✅` Implementar `P6.1` preparacion de entrega final (push/merge + handoff al siguiente turno).
+- `✅` Implementar `P6.2` ejecucion de publicacion remota (sincronizacion + push de branch).
+- `✅` Implementar `P6.3` cierre de entrega en plataforma (estado PR/merge + handoff final).
+- `✅` Implementar `P7.1` espera activa de revision (snapshot remoto + monitor de estado PR/checks).
+- `✅` Implementar `P7.2` cierre final de PR (atencion de feedback y merge con plataforma en estado limpio).
+- `🚧` Implementar `P8.1` arranque del siguiente incremento (sincronizacion post-merge y base de trabajo).

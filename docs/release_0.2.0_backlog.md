@@ -1,6 +1,6 @@
 # Backlog Priorizado - Release 0.2.0
 
-Fecha de corte: 2026-02-25
+Fecha de corte: 2026-02-26
 
 ## Objetivo
 Publicar `0.2.0` como version usable para practica individual con flujo estable:
@@ -32,14 +32,82 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - feedback visual durante analisis post-sesion (estado "analizando").
 
 ## P2 (mejora incremental)
-- `🚧` `P2.1` Ajustes avanzados:
+- `✅` `P2.1` Ajustes avanzados:
   - opcion para elegir carpeta de persistencia local.
   - limite configurable de retencion de sesiones.
-- `⏳` `P2.2` Telemetria local no sensible:
+- `✅` `P2.2` Telemetria local no sensible:
   - contador local de sesiones y tiempo de procesamiento promedio.
-- `⏳` `P2.3` Eliminar `@preconcurrency` en `AudioCaptureService`:
+- `✅` `P2.3` Eliminar `@preconcurrency` en `AudioCaptureService`:
   - migrar conversion de `AVAudioPCMBuffer` a una ruta sin captura non-Sendable en closure `@Sendable`.
   - mantener validacion con tests/construccion en Swift 6.2 strict concurrency.
+
+## P3 (post 0.2.0)
+- `✅` `P3.1` QA automatizado de flujos clave:
+  - script reproducible para smoke de start/stop, importacion y export markdown.
+- `✅` `P3.2` Evidencia automatizada de smoke para entregas:
+  - integrar ejecucion de `scripts/qa_smoke_flows.sh` en el ciclo de release local.
+  - mantener checklist de QA con evidencia del ultimo run automatizado.
+- `✅` `P3.3` Endurecimiento del gate local de entrega:
+  - comando unico de validacion (`release_local.sh`) documentado como entrada estandar de release local.
+  - checklist alineada con evidencia automatizada y comando canonico.
+- `✅` `P3.4` Endurecimiento operativo del ciclo local:
+  - consolidar `release_local.sh` como paso previo obligatorio antes de cierre de release local.
+  - mantener visibilidad de evidencia de gate y smoke en documentacion operativa.
+- `✅` `P3.5` Operativa de cierre de release local:
+  - estandarizar checklist final de cierre usando `release_local.sh` + `release_gate_status.sh`.
+  - documentar ruta minima de comandos para validacion final previa a entrega.
+- `✅` `P3.6` Cierre operacional del ciclo:
+  - consolidar checklist final de release local como paso de handoff obligatorio.
+  - mantener actualizacion de evidencia (gate/smoke/close checklist) por commit de entrega.
+- `✅` `P3.7` Handoff final de entrega:
+  - consolidar comando unico de handoff en documentacion de cierre.
+  - mantener salida de handoff como resumen operativo para entrega al siguiente turno.
+
+## P4 (iteracion UX/UI)
+- `✅` `P4.1` Checkpoint de UI/UX visual:
+  - preparar un corte de UI funcional del panel para revision visual guiada.
+  - validar jerarquia visual y legibilidad de estados antes de ajustes de estilo.
+- `✅` `P4.2` Ajustes visuales guiados por feedback:
+  - aplicar iteracion de layout/espaciado/tipografia segun review visual.
+  - cerrar detalles de legibilidad final para transcript, coach y estados del panel.
+- `✅` `P4.3` Cierre visual de menubar para demo:
+  - validar comportamiento del panel en sesiones largas (scroll y densidad de informacion).
+  - ajustar microcopys y botones segun feedback final de UX.
+- `✅` `P4.4` Pulido final de demo UX:
+  - revisar copy final y consistencia visual entre panel y settings.
+  - validar checklist visual corto para presentacion interna.
+
+## P5 (cierre pre-release UX)
+- `✅` `P5.1` Cierre de release candidate UX:
+  - ejecutar pasada final de QA manual con checklist visual y smoke local.
+  - confirmar paquete listo para presentacion interna sin fricciones de operativa.
+- `✅` `P5.2` Cierre de release candidate tecnico:
+  - ejecutar validacion final de evidencia (gate/smoke/handoff) en el nuevo `HEAD`.
+  - preparar commit de cierre y resumen operativo final para entrega.
+
+## P6 (post candidate)
+- `✅` `P6.1` Preparacion de entrega final:
+  - definir estrategia de push/merge y publicacion de branch.
+  - cerrar handoff final al siguiente turno con estado de release candidate.
+- `✅` `P6.2` Ejecucion de publicacion remota:
+  - sincronizar con remoto y resolver integracion de branch.
+  - publicar branch actualizado y dejar listo el flujo de PR/entrega.
+- `✅` `P6.3` Cierre de entrega en plataforma:
+  - revisar estado de PR/merge en GitHub.
+  - cerrar handoff final de turno con enlace al estado remoto.
+
+## P7 (post entrega)
+- `✅` `P7.1` Espera activa de revision:
+  - monitorizar feedback de PR y checks remotos.
+  - preparar respuesta rapida a comentarios o ajustes de merge.
+- `✅` `P7.2` Cierre final de PR:
+  - mantener monitor remoto y resolver feedback en cuanto aparezca.
+  - completar merge de release cuando el estado de plataforma lo permita.
+
+## P8 (siguiente ciclo)
+- `🚧` `P8.1` Arranque del siguiente incremento:
+  - sincronizar `develop` local con el estado post-merge.
+  - preparar base de trabajo para el siguiente bloque funcional.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
