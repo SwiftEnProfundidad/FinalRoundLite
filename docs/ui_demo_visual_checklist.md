@@ -35,3 +35,8 @@ Validar rapidamente que el panel menubar es presentable en una demo corta sin fr
 
 ## Resultado de la iteracion actual
 - Estado: `OK para demo interna`.
+- Ultima validacion operativa:
+  - commit: `1cd110a`
+  - gate_run_at_utc: `2026-02-26T21:11:04Z`
+  - smoke_run_at_utc: `2026-02-26T21:11:11Z`
+  - comando de cierre: `bash scripts/release_handoff_local.sh`

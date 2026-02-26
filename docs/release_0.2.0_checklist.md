@@ -112,5 +112,23 @@ Ultima actualizacion: 2026-02-25
 - `✅` Resultado actual:
   - estado: `OK para demo interna`.
 
+## 11) Cierre release candidate UX (P5.1)
+- `✅` Pasada final de QA local ejecutada:
+  - comando: `bash scripts/release_handoff_local.sh`
+  - salida: `RELEASE_HANDOFF_LOCAL_OK`.
+- `✅` Evidencia de cierre en `HEAD`:
+  - `head_commit=1cd110a`
+  - `gate_run_at_utc=2026-02-26T21:11:04Z`
+  - `smoke_run_at_utc=2026-02-26T21:11:11Z`
+  - `release_handoff_run_at_utc=2026-02-26T21:11:04Z`
+  - archivos:
+    - `build/smoke/release_local_gate.txt`
+    - `build/smoke/qa_smoke_last_run.txt`
+    - `build/smoke/release_close_checklist.txt`
+    - `build/smoke/release_handoff_local.txt`
+- `✅` QA visual manual guiada:
+  - referencia: `docs/ui_demo_visual_checklist.md`
+  - foco validado: copy consistente panel/ajustes, control del panel (`Cerrar panel`/`Salir`) y operativa sin friccion.
+
 ## Estado actual
-- `P0.3` completado en este entorno con evidencia reproducible de importacion/guardado/persistencia y manejo robusto de ausencia de microfono.
+- `P5.1` completado; release candidate UX listo para presentacion interna en este entorno.

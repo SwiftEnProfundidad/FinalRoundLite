@@ -78,9 +78,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
   - validar checklist visual corto para presentacion interna.
 
 ## P5 (cierre pre-release UX)
-- `🚧` `P5.1` Cierre de release candidate UX:
+- `✅` `P5.1` Cierre de release candidate UX:
   - ejecutar pasada final de QA manual con checklist visual y smoke local.
   - confirmar paquete listo para presentacion interna sin fricciones de operativa.
+- `🚧` `P5.2` Cierre de release candidate tecnico:
+  - ejecutar validacion final de evidencia (gate/smoke/handoff) en el nuevo `HEAD`.
+  - preparar commit de cierre y resumen operativo final para entrega.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
