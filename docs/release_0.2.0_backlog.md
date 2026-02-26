@@ -151,9 +151,14 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P10.4` Persistencia de preferencias del panel:
   - guardar y restaurar el estado de vista compacta/expansion de resultados entre aperturas.
   - validar cobertura de tests para la nueva serializacion de preferencias.
-- `🚧` `P10.5` Operativa de cierre del ciclo P10:
+- `✅` `P10.5` Operativa de cierre del ciclo P10:
   - validar estado remoto de la PR de continuidad con cambios P10.
   - dejar ciclo listo para merge cuando plataforma este limpia.
+
+## P11 (post P10)
+- `🚧` `P11.1` Arranque de nuevo ciclo post-P10:
+  - dejar rama de continuidad creada desde `develop` post-merge de `P10`.
+  - actualizar tracking inicial para preparar el siguiente bloque funcional.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
