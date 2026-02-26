@@ -438,5 +438,29 @@ Ultima actualizacion: 2026-02-26
   - resultado: `RELEASE_PR_MONITOR_OK`
   - snapshot: `PR #7 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
 
+## 34) Definicion del incremento funcional del ciclo P11 (P11.2)
+- `✅` Alcance priorizado del bloque P11:
+  - `P11.3`: atajos de teclado y accesibilidad del panel.
+  - `P11.4`: cierre operativo de PR de continuidad del ciclo.
+- `✅` Criterio de ejecucion:
+  - aplicar primero mejoras directas de operativa en panel (`P11.3`).
+  - mantener cierre remoto/merge como siguiente paso (`P11.4`).
+
+## 35) Atajos de teclado y accesibilidad en panel (P11.3)
+- `✅` Atajos de teclado en acciones clave:
+  - `Cmd+Return`: iniciar/detener practica.
+  - `Cmd+Shift+I`: analizar archivo.
+  - `Cmd+Shift+C`: copiar reporte.
+  - `Cmd+S`: guardar reporte.
+  - `Cmd+Shift+K`: limpiar salida.
+  - `Cmd+Option+E`: expandir/contraer resultados.
+  - `Cmd+W`: cerrar panel.
+  - `Cmd+Q`: salir.
+- `✅` Refuerzo de accesibilidad:
+  - labels/hints de VoiceOver para botones `MD`, `JSON` y `Borrar` en historial rapido.
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `56 tests, 0 failures`.
+
 ## Estado actual
-- `P11.1` completado; `P11.2` en construccion para definir el siguiente incremento funcional.
+- `P11.3` completado; `P11.4` en construccion para cierre operativo del ciclo P11.

@@ -123,6 +123,7 @@ struct MenuBarPanelView: View {
             }
             .buttonStyle(.borderless)
             .font(.caption.weight(.semibold))
+            .keyboardShortcut("e", modifiers: [.command, .option])
 
             HStack(spacing: 8) {
                 Button {
@@ -135,6 +136,7 @@ struct MenuBarPanelView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(model.status == .analyzing)
+                .keyboardShortcut(.return, modifiers: [.command])
 
                 Button {
                     model.importAudioAndAnalyze()
@@ -143,6 +145,7 @@ struct MenuBarPanelView: View {
                 }
                 .buttonStyle(.bordered)
                 .disabled(model.status.isBusy || model.isListening)
+                .keyboardShortcut("i", modifiers: [.command, .shift])
             }
 
             secondaryActionsView
@@ -398,6 +401,7 @@ struct MenuBarPanelView: View {
         }
         .buttonStyle(.bordered)
         .disabled(!model.hasSessionOutput)
+        .keyboardShortcut("c", modifiers: [.command, .shift])
     }
 
     private var saveMarkdownButton: some View {
@@ -413,6 +417,7 @@ struct MenuBarPanelView: View {
         }
         .buttonStyle(.bordered)
         .disabled(!model.hasSessionOutput)
+        .keyboardShortcut("s", modifiers: [.command])
     }
 
     private var clearButton: some View {
@@ -423,6 +428,7 @@ struct MenuBarPanelView: View {
         }
         .buttonStyle(.bordered)
         .disabled(!model.hasSessionOutput)
+        .keyboardShortcut("k", modifiers: [.command, .shift])
     }
 
     private var footer: some View {
@@ -434,6 +440,7 @@ struct MenuBarPanelView: View {
                 closePanelWindow()
             }
             .buttonStyle(.bordered)
+            .keyboardShortcut("w", modifiers: [.command])
 
             Spacer()
             Button("Salir") {
@@ -441,6 +448,7 @@ struct MenuBarPanelView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.red)
+            .keyboardShortcut("q", modifiers: [.command])
         }
         .font(.caption)
     }
@@ -501,12 +509,16 @@ struct MenuBarPanelView: View {
             .buttonStyle(.bordered)
             .font(.caption2)
             .disabled(session.markdownURL == nil)
+            .accessibilityLabel("Abrir Markdown de sesion")
+            .accessibilityHint("Abre el archivo Markdown en la aplicacion por defecto")
 
             Button("JSON") {
                 model.openSavedSessionJSON(session)
             }
             .buttonStyle(.bordered)
             .font(.caption2)
+            .accessibilityLabel("Abrir JSON de sesion")
+            .accessibilityHint("Abre el archivo JSON en la aplicacion por defecto")
 
             Button {
                 sessionPendingDeletion = session
@@ -516,6 +528,8 @@ struct MenuBarPanelView: View {
             .buttonStyle(.bordered)
             .font(.caption2)
             .tint(.red)
+            .accessibilityLabel("Borrar sesion local")
+            .accessibilityHint("Elimina el JSON y el Markdown asociados")
         }
         .padding(8)
         .background(.quaternary.opacity(0.3), in: .rect(cornerRadius: 8))

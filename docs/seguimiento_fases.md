@@ -93,4 +93,6 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P10.4` persistencia de preferencias del panel.
 - `✅` Implementar `P10.5` operativa de cierre del ciclo P10 (estado remoto + merge).
 - `✅` Implementar `P11.1` arranque de nuevo ciclo post-P10 (rama de continuidad + tracking inicial).
-- `🚧` Implementar `P11.2` definicion del siguiente incremento funcional del ciclo P11.
+- `✅` Implementar `P11.2` definicion del siguiente incremento funcional del ciclo P11.
+- `✅` Implementar `P11.3` atajos de teclado y accesibilidad en panel.
+- `🚧` Implementar `P11.4` operativa de cierre del ciclo P11 (estado remoto + merge).
