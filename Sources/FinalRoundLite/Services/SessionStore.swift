@@ -3,6 +3,8 @@ import Foundation
 protocol SessionPersisting: Sendable {
     func save(session: PersistedSession, retentionLimit: Int?) async throws -> URL
     func listSessions(limit: Int) async throws -> [SavedSessionRecord]
+    func delete(session: SavedSessionRecord) async throws
+    func deleteAllSessions() async throws
 }
 
 protocol SessionStoreConfiguring: Sendable {
@@ -106,6 +108,34 @@ actor SessionStore: SessionPersisting, SessionStoreConfiguring {
             .sorted { $0.savedAt > $1.savedAt }
             .prefix(limit)
             .map { $0 }
+    }
+
+    func delete(session: SavedSessionRecord) throws {
+        if fileManager.fileExists(atPath: session.jsonURL.path()) {
+            try fileManager.removeItem(at: session.jsonURL)
+        }
+
+        let markdownURL = session.markdownURL ??
+            session.jsonURL.deletingPathExtension().appendingPathExtension("md")
+        if fileManager.fileExists(atPath: markdownURL.path()) {
+            try fileManager.removeItem(at: markdownURL)
+        }
+    }
+
+    func deleteAllSessions() throws {
+        let directory = try sessionsDirectoryURL()
+        let urls = try fileManager.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )
+
+        for url in urls where url.lastPathComponent.hasPrefix("session-") {
+            let ext = url.pathExtension.lowercased()
+            if ext == "json" || ext == "md" {
+                try fileManager.removeItem(at: url)
+            }
+        }
     }
 
     private func sessionsDirectoryURL() throws -> URL {

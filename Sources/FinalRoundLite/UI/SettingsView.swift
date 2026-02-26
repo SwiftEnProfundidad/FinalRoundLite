@@ -3,6 +3,9 @@ import SwiftUI
 struct SettingsView: View {
     @Bindable var model: AppModel
     @State private var apiKeyDraft = ""
+    @State private var historySearchQuery = ""
+    @State private var sessionPendingDeletion: SavedSessionRecord?
+    @State private var isConfirmingDeleteAll = false
 
     var body: some View {
         Form {
@@ -83,18 +86,28 @@ struct SettingsView: View {
                     Button("Actualizar") {
                         model.refreshSavedSessions()
                     }
+                    Button("Borrar todo…", role: .destructive) {
+                        isConfirmingDeleteAll = true
+                    }
+                    .disabled(model.savedSessions.isEmpty)
                     if model.isLoadingSavedSessions {
                         ProgressView()
                             .controlSize(.small)
                     }
                 }
 
+                TextField("Buscar sesiones (archivo o fecha)", text: $historySearchQuery)
+
                 if model.savedSessions.isEmpty {
                     Text("No hay sesiones guardadas.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                } else if filteredSavedSessions.isEmpty {
+                    Text("No hay coincidencias para \"\(historySearchQuery)\".")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 } else {
-                    ForEach(Array(model.savedSessions.prefix(8))) { session in
+                    ForEach(filteredSavedSessions) { session in
                         VStack(alignment: .leading, spacing: 6) {
                             Text(session.savedAt, format: .dateTime.year().month().day().hour().minute())
                                 .font(.caption.bold())
@@ -114,13 +127,16 @@ struct SettingsView: View {
                                 Button("Mostrar en Finder") {
                                     model.revealSavedSessionInFinder(session)
                                 }
+                                Button("Borrar…", role: .destructive) {
+                                    sessionPendingDeletion = session
+                                }
                             }
                             .buttonStyle(.bordered)
                         }
                         .padding(.vertical, 4)
                     }
 
-                    if model.savedSessions.count > 8 {
+                    if historySearchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, model.savedSessions.count > 8 {
                         Text("Mostrando las 8 sesiones mas recientes.")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -151,5 +167,42 @@ struct SettingsView: View {
         .task {
             model.refreshSavedSessions()
         }
+        .confirmationDialog("Borrar sesion local", isPresented: isDeleteSessionDialogPresented, titleVisibility: .visible) {
+            Button("Borrar", role: .destructive) {
+                guard let sessionPendingDeletion else { return }
+                model.deleteSavedSession(sessionPendingDeletion)
+                self.sessionPendingDeletion = nil
+            }
+            Button("Cancelar", role: .cancel) {
+                sessionPendingDeletion = nil
+            }
+        } message: {
+            if let sessionPendingDeletion {
+                Text("Se borrara \(sessionPendingDeletion.jsonURL.lastPathComponent).")
+            }
+        }
+        .confirmationDialog("Borrar todo el historial local", isPresented: $isConfirmingDeleteAll, titleVisibility: .visible) {
+            Button("Borrar todo", role: .destructive) {
+                model.deleteAllSavedSessions()
+            }
+            Button("Cancelar", role: .cancel) {}
+        } message: {
+            Text("Esta accion elimina todos los JSON/Markdown guardados en disco.")
+        }
+    }
+
+    private var filteredSavedSessions: [SavedSessionRecord] {
+        model.filteredSavedSessions(matching: historySearchQuery, limit: 8)
+    }
+
+    private var isDeleteSessionDialogPresented: Binding<Bool> {
+        Binding(
+            get: { sessionPendingDeletion != nil },
+            set: { isPresented in
+                if !isPresented {
+                    sessionPendingDeletion = nil
+                }
+            }
+        )
     }
 }

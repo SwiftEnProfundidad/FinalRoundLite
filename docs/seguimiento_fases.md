@@ -77,4 +77,9 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P6.3` cierre de entrega en plataforma (estado PR/merge + handoff final).
 - `✅` Implementar `P7.1` espera activa de revision (snapshot remoto + monitor de estado PR/checks).
 - `✅` Implementar `P7.2` cierre final de PR (atencion de feedback y merge con plataforma en estado limpio).
-- `🚧` Implementar `P8.1` arranque del siguiente incremento (sincronizacion post-merge y base de trabajo).
+- `✅` Implementar `P8.1` arranque del siguiente incremento (sincronizacion post-merge y base de trabajo con rama/PR nueva).
+- `✅` Implementar `P8.2` definicion del siguiente incremento funcional (alcance priorizado y desglose ejecutable).
+- `✅` Implementar `P8.3` historial rapido en panel menubar (ultimas sesiones + apertura directa desde panel).
+- `✅` Implementar `P8.4` filtro de historial en Settings (busqueda local por texto en archivo/fecha).
+- `✅` Implementar `P8.5` operativa de limpieza de historial (borrado puntual/total con confirmacion y smoke).
+- `🚧` Implementar `P8.6` cierre del bloque P8 (validacion remota y preparacion de merge).

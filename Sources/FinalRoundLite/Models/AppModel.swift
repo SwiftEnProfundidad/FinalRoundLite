@@ -37,6 +37,8 @@ final class AppModel {
     var telemetryAverageProcessingSeconds = 0.0
     var savedSessions: [SavedSessionRecord] = []
     var isLoadingSavedSessions = false
+    var panelSavedSessions: [SavedSessionRecord] = []
+    var isLoadingPanelSavedSessions = false
     var languageCode = "es"
     var transcriptionModel = "gpt-4o-mini-transcribe"
     var coachModel = "gpt-4o-mini"
@@ -242,10 +244,47 @@ final class AppModel {
             guard let self else { return }
             do {
                 self.savedSessions = try await self.sessionStore.listSessions(limit: effectiveLimit)
+                self.panelSavedSessions = Array(self.savedSessions.prefix(Self.panelSavedSessionsLimit))
             } catch {
                 self.errorMessage = "No se pudo cargar historial local: \(error.localizedDescription)"
             }
             self.isLoadingSavedSessions = false
+        }
+    }
+
+    func filteredSavedSessions(matching query: String, limit: Int = 8) -> [SavedSessionRecord] {
+        let effectiveLimit = max(1, limit)
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else {
+            return Array(savedSessions.prefix(effectiveLimit))
+        }
+
+        return Array(
+            savedSessions
+                .filter { session in
+                    let jsonName = session.jsonURL.lastPathComponent
+                    let markdownName = session.markdownURL?.lastPathComponent ?? ""
+                    let savedAtText = session.savedAt.formatted(date: .abbreviated, time: .shortened)
+                    return jsonName.localizedStandardContains(trimmedQuery) ||
+                        markdownName.localizedStandardContains(trimmedQuery) ||
+                        savedAtText.localizedStandardContains(trimmedQuery)
+                }
+                .prefix(effectiveLimit)
+        )
+    }
+
+    func refreshPanelSavedSessions(limit: Int = panelSavedSessionsLimit) {
+        isLoadingPanelSavedSessions = true
+        let effectiveLimit = max(1, limit)
+
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                self.panelSavedSessions = try await self.sessionStore.listSessions(limit: effectiveLimit)
+            } catch {
+                self.errorMessage = "No se pudo cargar historial rapido: \(error.localizedDescription)"
+            }
+            self.isLoadingPanelSavedSessions = false
         }
     }
 
@@ -269,6 +308,32 @@ final class AppModel {
     func revealSavedSessionInFinder(_ session: SavedSessionRecord) {
         if !fileOpener.reveal(session.jsonURL) {
             errorMessage = "No se pudo mostrar el archivo en Finder."
+        }
+    }
+
+    func deleteSavedSession(_ session: SavedSessionRecord) {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.sessionStore.delete(session: session)
+                self.savedSessions = try await self.sessionStore.listSessions(limit: self.sessionRetentionLimit)
+                self.panelSavedSessions = Array(self.savedSessions.prefix(Self.panelSavedSessionsLimit))
+            } catch {
+                self.errorMessage = "No se pudo borrar la sesion local: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    func deleteAllSavedSessions() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.sessionStore.deleteAllSessions()
+                self.savedSessions = []
+                self.panelSavedSessions = []
+            } catch {
+                self.errorMessage = "No se pudo borrar el historial local: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -363,6 +428,7 @@ final class AppModel {
                 )
                 self.lastPersistedFingerprint = fingerprint
                 self.savedSessions = try await self.sessionStore.listSessions(limit: sessionRetentionLimit)
+                self.panelSavedSessions = Array(self.savedSessions.prefix(Self.panelSavedSessionsLimit))
             } catch {
                 self.errorMessage = "No se pudo guardar la sesion local: \(error.localizedDescription)"
             }
@@ -450,6 +516,8 @@ final class AppModel {
         telemetrySessionCount = snapshot.sessionCount
         telemetryAverageProcessingSeconds = snapshot.averageProcessingSeconds
     }
+
+    private static let panelSavedSessionsLimit = 4
 }
 
 extension AppModel {

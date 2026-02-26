@@ -80,7 +80,38 @@ final class AppModelPersistenceTests: XCTestCase {
         try await Task.sleep(nanoseconds: 150_000_000)
 
         XCTAssertEqual(model.savedSessions, [second, first])
+        XCTAssertEqual(model.panelSavedSessions, [second, first])
         XCTAssertFalse(model.isLoadingSavedSessions)
+    }
+
+    @MainActor
+    func testRefreshPanelSavedSessions_loadsRecentSubset() async throws {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-1.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-1.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-2.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-2.md")
+        )
+        let third = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 30),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-3.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-3.md")
+        )
+        await storeSpy.setListedSessions([third, second, first])
+
+        model.refreshPanelSavedSessions(limit: 2)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        XCTAssertEqual(model.panelSavedSessions, [third, second])
+        XCTAssertFalse(model.isLoadingPanelSavedSessions)
     }
 
     @MainActor
@@ -95,6 +126,76 @@ final class AppModelPersistenceTests: XCTestCase {
 
         let listedLimit = await storeSpy.latestListedLimit()
         XCTAssertEqual(listedLimit, 3)
+    }
+
+    @MainActor
+    func testFilteredSavedSessions_whenQueryEmpty_usesLimitAndOrder() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-alpha.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-alpha.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-beta.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-beta.md")
+        )
+        let third = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 30),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-gamma.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-gamma.md")
+        )
+        model.savedSessions = [third, second, first]
+
+        let filtered = model.filteredSavedSessions(matching: "", limit: 2)
+
+        XCTAssertEqual(filtered, [third, second])
+    }
+
+    @MainActor
+    func testFilteredSavedSessions_matchesByFilename() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let matching = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/interview-system-design.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/interview-system-design.md")
+        )
+        let nonMatching = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-random.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-random.md")
+        )
+        model.savedSessions = [matching, nonMatching]
+
+        let filtered = model.filteredSavedSessions(matching: "system", limit: 8)
+
+        XCTAssertEqual(filtered, [matching])
+    }
+
+    @MainActor
+    func testFilteredSavedSessions_returnsEmptyWhenNoMatch() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        model.savedSessions = [
+            SavedSessionRecord(
+                savedAt: Date(timeIntervalSince1970: 10),
+                jsonURL: URL(fileURLWithPath: "/tmp/session-a.json"),
+                markdownURL: URL(fileURLWithPath: "/tmp/session-a.md")
+            )
+        ]
+
+        let filtered = model.filteredSavedSessions(matching: "zz-no-match", limit: 8)
+
+        XCTAssertTrue(filtered.isEmpty)
     }
 
     @MainActor
@@ -164,6 +265,66 @@ final class AppModelPersistenceTests: XCTestCase {
     }
 
     @MainActor
+    func testDeleteSavedSession_removesItemFromModelAndStore() async throws {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-a.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-a.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-b.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-b.md")
+        )
+        await storeSpy.setListedSessions([second, first])
+
+        model.refreshSavedSessions(limit: 10)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        model.deleteSavedSession(second)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        XCTAssertEqual(model.savedSessions, [first])
+        XCTAssertEqual(model.panelSavedSessions, [first])
+        let deletedIDs = await storeSpy.deletedSessionIDs()
+        XCTAssertEqual(deletedIDs, [second.id])
+    }
+
+    @MainActor
+    func testDeleteAllSavedSessions_clearsModelAndStore() async throws {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let model = AppModel(sessionStore: storeSpy, telemetryStore: telemetrySpy)
+
+        let first = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 10),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-a.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-a.md")
+        )
+        let second = SavedSessionRecord(
+            savedAt: Date(timeIntervalSince1970: 20),
+            jsonURL: URL(fileURLWithPath: "/tmp/session-b.json"),
+            markdownURL: URL(fileURLWithPath: "/tmp/session-b.md")
+        )
+        await storeSpy.setListedSessions([second, first])
+
+        model.refreshSavedSessions(limit: 10)
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        model.deleteAllSavedSessions()
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        XCTAssertTrue(model.savedSessions.isEmpty)
+        XCTAssertTrue(model.panelSavedSessions.isEmpty)
+        let deleteAllCount = await storeSpy.deleteAllCallCount()
+        XCTAssertEqual(deleteAllCount, 1)
+    }
+
+    @MainActor
     func testConsumeStopped_updatesTelemetrySnapshot() async throws {
         let storeSpy = SessionStoreSpy()
         let telemetrySpy = TelemetryStoreSpy()
@@ -189,6 +350,8 @@ private actor SessionStoreSpy: SessionPersisting, SessionStoreConfiguring {
     private var retentionLimits: [Int?] = []
     private var listedLimits: [Int] = []
     private var configuredDirectoryURLs: [URL?] = []
+    private var deletedSessionIDsInternal: [String] = []
+    private var deleteAllCalls = 0
 
     func save(session: PersistedSession, retentionLimit: Int?) async throws -> URL {
         sessions.append(session)
@@ -199,6 +362,16 @@ private actor SessionStoreSpy: SessionPersisting, SessionStoreConfiguring {
     func listSessions(limit: Int) async throws -> [SavedSessionRecord] {
         listedLimits.append(limit)
         return Array(sessionsForListing.prefix(limit))
+    }
+
+    func delete(session: SavedSessionRecord) async throws {
+        deletedSessionIDsInternal.append(session.id)
+        sessionsForListing.removeAll { $0.id == session.id }
+    }
+
+    func deleteAllSessions() async throws {
+        deleteAllCalls += 1
+        sessionsForListing.removeAll()
     }
 
     func setBaseDirectoryURL(_ url: URL?) async {
@@ -230,6 +403,14 @@ private actor SessionStoreSpy: SessionPersisting, SessionStoreConfiguring {
             return latest?.path
         }
         return nil
+    }
+
+    func deletedSessionIDs() -> [String] {
+        deletedSessionIDsInternal
+    }
+
+    func deleteAllCallCount() -> Int {
+        deleteAllCalls
     }
 }
 
