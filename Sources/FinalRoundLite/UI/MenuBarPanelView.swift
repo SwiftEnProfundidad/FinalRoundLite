@@ -2,6 +2,9 @@ import SwiftUI
 
 struct MenuBarPanelView: View {
     @Bindable var model: AppModel
+    @State private var isCompactMode = false
+    @State private var isTranscriptExpanded = true
+    @State private var isCoachExpanded = true
 
     var body: some View {
         ScrollView {
@@ -25,7 +28,7 @@ struct MenuBarPanelView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("FinalRound Lite")
                         .font(.headline)
-                    Text("Practice mode")
+                    Text("Modo practica")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -82,15 +85,16 @@ struct MenuBarPanelView: View {
             Text("Controles")
                 .font(.subheadline.bold())
 
-            Toggle("Enviar audio a OpenAI", isOn: $model.sendAudioToOpenAI)
-            Toggle("Low cost", isOn: $model.lowCostMode)
+            Toggle("Enviar audio a OpenAI (transcripcion)", isOn: $model.sendAudioToOpenAI)
+            Toggle("Modo ahorro (coach menos frecuente)", isOn: $model.lowCostMode)
+            Toggle("Vista compacta", isOn: $isCompactMode)
 
             HStack(spacing: 8) {
                 Button {
                     model.isListening ? model.stop() : model.start()
                 } label: {
                     Label(
-                        model.isListening ? "Detener" : "Iniciar",
+                        model.isListening ? "Detener practica" : "Iniciar practica",
                         systemImage: model.isListening ? "stop.fill" : "mic.fill"
                     )
                 }
@@ -100,7 +104,7 @@ struct MenuBarPanelView: View {
                 Button {
                     model.importAudioAndAnalyze()
                 } label: {
-                    Label("Importar audio", systemImage: "waveform.badge.plus")
+                    Label("Analizar archivo", systemImage: "waveform.badge.plus")
                 }
                 .buttonStyle(.bordered)
                 .disabled(model.status.isBusy || model.isListening)
@@ -120,74 +124,123 @@ struct MenuBarPanelView: View {
                 Text("\(model.transcript.count) caracteres")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                Button(isTranscriptExpanded ? "Ocultar" : "Mostrar") {
+                    isTranscriptExpanded.toggle()
+                }
+                .buttonStyle(.borderless)
+                .font(.caption2.weight(.semibold))
             }
 
-            ScrollView {
-                Text(model.transcript.isEmpty ? "Todavia no hay transcript." : model.transcript)
+            if isTranscriptExpanded {
+                ScrollView {
+                    Text(model.transcript.isEmpty ? "Todavia no hay transcript." : model.transcript)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                        .font(isCompactMode ? .caption : .callout)
+                        .foregroundStyle(model.transcript.isEmpty ? .secondary : .primary)
+                        .padding(.vertical, 2)
+                }
+                .scrollIndicators(.hidden)
+                .frame(height: transcriptSectionHeight)
+                .padding(10)
+                .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
+
+                if transcriptWasTrimmed {
+                    Text("Mostrando solo el tramo mas reciente del transcript.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Text(transcriptPreview)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
-                    .font(.callout)
-                    .foregroundStyle(model.transcript.isEmpty ? .secondary : .primary)
-                    .padding(.vertical, 2)
+                    .padding(10)
+                    .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
             }
-            .scrollIndicators(.hidden)
-            .frame(height: 128)
-            .padding(10)
-            .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
         }
         .panelCardStyle()
     }
 
     private var suggestionCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Coach (System Design)")
-                .font(.subheadline.bold())
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    if !model.currentQuestion.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Pregunta actual")
-                                .font(.caption.bold())
-                                .foregroundStyle(.secondary)
-                            Text(model.currentQuestion)
-                                .font(.callout)
-                        }
-                    }
-
-                    if !model.shortScript.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Guion corto")
-                                .font(.caption.bold())
-                                .foregroundStyle(.secondary)
-                            Text(model.shortScript)
-                                .font(.callout)
-                                .textSelection(.enabled)
-                        }
-                    }
-
-                    if !model.clarifyingQuestions.isEmpty {
-                        TagListView(title: "Clarificaciones", items: model.clarifyingQuestions)
-                    }
-                    if !model.tradeoffs.isEmpty {
-                        TagListView(title: "Tradeoffs", items: model.tradeoffs)
-                    }
-                    if !model.nextSteps.isEmpty {
-                        TagListView(title: "Siguientes pasos", items: model.nextSteps)
-                    }
-                    if !hasCoachContent {
-                        Text("Aun no hay sugerencias. Inicia o importa audio para generar coach.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+            HStack {
+                Text("Coach (System Design)")
+                    .font(.subheadline.bold())
+                Spacer()
+                Button(isCoachExpanded ? "Ocultar" : "Mostrar") {
+                    isCoachExpanded.toggle()
                 }
-                .padding(.vertical, 2)
+                .buttonStyle(.borderless)
+                .font(.caption2.weight(.semibold))
             }
-            .scrollIndicators(.hidden)
-            .frame(height: 184)
-            .padding(10)
-            .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
+
+            if isCoachExpanded {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        if !model.currentQuestion.isEmpty {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Pregunta actual")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.secondary)
+                                Text(model.currentQuestion)
+                                    .font(isCompactMode ? .caption : .callout)
+                            }
+                        }
+
+                        if !model.shortScript.isEmpty {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Guion corto")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.secondary)
+                                Text(model.shortScript)
+                                    .font(isCompactMode ? .caption : .callout)
+                                    .textSelection(.enabled)
+                            }
+                        }
+
+                        if !model.clarifyingQuestions.isEmpty {
+                            TagListView(
+                                title: "Clarificaciones",
+                                items: model.clarifyingQuestions,
+                                isCompact: isCompactMode
+                            )
+                        }
+                        if !model.tradeoffs.isEmpty {
+                            TagListView(
+                                title: "Tradeoffs",
+                                items: model.tradeoffs,
+                                isCompact: isCompactMode
+                            )
+                        }
+                        if !model.nextSteps.isEmpty {
+                            TagListView(
+                                title: "Siguientes pasos",
+                                items: model.nextSteps,
+                                isCompact: isCompactMode
+                            )
+                        }
+                        if !hasCoachContent {
+                            Text("Aun no hay sugerencias. Inicia o importa audio para generar coach.")
+                                .font(isCompactMode ? .caption : .callout)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+                .scrollIndicators(.hidden)
+                .frame(height: coachSectionHeight)
+                .padding(10)
+                .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
+            } else {
+                Text(coachPreview)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 10))
+            }
         }
         .panelCardStyle()
     }
@@ -271,7 +324,7 @@ struct MenuBarPanelView: View {
         Button {
             Clipboard.copy(model.exportMarkdown())
         } label: {
-            Label("Copiar Markdown", systemImage: "doc.on.doc")
+            Label("Copiar reporte", systemImage: "doc.on.doc")
         }
         .buttonStyle(.bordered)
         .disabled(!model.hasSessionOutput)
@@ -286,7 +339,7 @@ struct MenuBarPanelView: View {
                 )
             }
         } label: {
-            Label("Guardar…", systemImage: "square.and.arrow.down")
+            Label("Guardar reporte…", systemImage: "square.and.arrow.down")
         }
         .buttonStyle(.bordered)
         .disabled(!model.hasSessionOutput)
@@ -296,7 +349,7 @@ struct MenuBarPanelView: View {
         Button {
             model.clearSessionOutput()
         } label: {
-            Label("Limpiar", systemImage: "trash")
+            Label("Limpiar salida", systemImage: "trash")
         }
         .buttonStyle(.bordered)
         .disabled(!model.hasSessionOutput)
@@ -308,8 +361,42 @@ struct MenuBarPanelView: View {
                 Text("Settings")
             }
             Spacer()
+            Text("Tip: ⌘, abre ajustes")
+                .foregroundStyle(.secondary)
         }
         .font(.caption)
+    }
+
+    private var transcriptSectionHeight: CGFloat {
+        isCompactMode ? 96 : 132
+    }
+
+    private var coachSectionHeight: CGFloat {
+        isCompactMode ? 148 : 198
+    }
+
+    private var transcriptWasTrimmed: Bool {
+        model.transcript.hasPrefix("…\n")
+    }
+
+    private var transcriptPreview: String {
+        let value = model.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return "Sin transcript todavia." }
+        let limit = isCompactMode ? 90 : 140
+        let slice = String(value.prefix(limit))
+        return value.count > limit ? "\(slice)…" : slice
+    }
+
+    private var coachPreview: String {
+        if !model.currentQuestion.isEmpty {
+            return "Pregunta: \(model.currentQuestion)"
+        }
+        if !model.shortScript.isEmpty {
+            let limit = isCompactMode ? 90 : 140
+            let slice = String(model.shortScript.prefix(limit))
+            return model.shortScript.count > limit ? "\(slice)…" : slice
+        }
+        return "Sin coach todavia."
     }
 }
 
@@ -381,11 +468,12 @@ private extension AppModel.Status {
 private struct TagListView: View {
     let title: String
     let items: [String]
+    let isCompact: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.caption.bold())
+            Text("\(title) (\(items.count))")
+                .font((isCompact ? Font.caption2 : Font.caption).bold())
                 .foregroundStyle(.secondary)
             ForEach(identifiedItems(items)) { item in
                 HStack(alignment: .top, spacing: 6) {
@@ -393,7 +481,8 @@ private struct TagListView: View {
                         .font(.system(size: 4))
                         .padding(.top, 7)
                     Text(item.value)
-                        .font(.caption)
+                        .font(isCompact ? .caption2 : .caption)
+                        .lineLimit(isCompact ? 2 : nil)
                 }
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
