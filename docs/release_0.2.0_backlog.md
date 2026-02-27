@@ -179,9 +179,12 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P12.3` Persistencia de configuracion operativa:
   - guardar y restaurar automaticamente idioma, modelos y toggles de practica entre aperturas.
   - validar cobertura de tests para serializacion de configuracion runtime.
-- `🚧` `P12.4` Operativa de cierre del ciclo P12:
+- `✅` `P12.4` Operativa de cierre del ciclo P12:
   - validar estado remoto de la PR de continuidad tras cambios P12.
   - consolidar merge del ciclo cuando plataforma este en estado limpio.
+
+## Estado final
+- `✅` Todas las tasks del plan actual estan completadas.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
