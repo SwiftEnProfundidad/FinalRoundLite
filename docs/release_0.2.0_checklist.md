@@ -492,5 +492,36 @@ Ultima actualizacion: 2026-02-26
   - resultado: `RELEASE_PR_MONITOR_OK`
   - snapshot: `PR #8 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
 
+## 38) Definicion del incremento funcional del ciclo P12 (P12.2)
+- `✅` Alcance priorizado del bloque P12:
+  - `P12.3`: persistencia de configuracion operativa de runtime.
+  - `P12.4`: cierre operativo del ciclo en plataforma.
+- `✅` Criterio de ejecucion:
+  - implementar primero persistencia de configuracion para continuidad de UX.
+  - cerrar PR de continuidad al finalizar verificaciones.
+
+## 39) Persistencia de configuracion operativa (P12.3)
+- `✅` Store dedicado de configuracion runtime:
+  - nuevo archivo: `Sources/FinalRoundLite/Services/RuntimeSettingsStore.swift`
+  - contrato: `RuntimeSettingsStoring`
+  - implementacion: `UserDefaultsRuntimeSettingsStore`.
+- `✅` Integracion en `AppModel`:
+  - carga inicial de preferencias runtime en init:
+    - `sendAudioToOpenAI`
+    - `lowCostMode`
+    - `persistSessionsLocally`
+    - `languageCode`
+    - `transcriptionModel`
+    - `coachModel`
+  - persistencia automatica al actualizar esas propiedades.
+- `✅` Cobertura de tests:
+  - nuevo archivo: `Tests/FinalRoundLiteTests/RuntimeSettingsStoreTests.swift`
+  - nuevos tests en `AppModelPersistenceTests`:
+    - `testInit_appliesStoredRuntimeSettingsPreferences`
+    - `testRuntimeSettingsPreferences_changesPersistIntoStore`
+- `✅` Verificacion local:
+  - comando: `swift test`
+  - resultado: `60 tests, 0 failures`.
+
 ## Estado actual
-- `P12.1` completado; `P12.2` en construccion para definir el siguiente incremento funcional.
+- `P12.3` completado; `P12.4` en construccion para cierre operativo del ciclo P12.

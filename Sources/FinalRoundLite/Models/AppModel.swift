@@ -18,9 +18,21 @@ final class AppModel {
     var nextSteps: [String] = []
     var lastSuggestionAt: Date?
 
-    var sendAudioToOpenAI = false
-    var lowCostMode = false
-    var persistSessionsLocally = false
+    var sendAudioToOpenAI = RuntimeSettingsPreferences.default.sendAudioToOpenAI {
+        didSet {
+            persistRuntimeSettings()
+        }
+    }
+    var lowCostMode = RuntimeSettingsPreferences.default.lowCostMode {
+        didSet {
+            persistRuntimeSettings()
+        }
+    }
+    var persistSessionsLocally = RuntimeSettingsPreferences.default.persistSessionsLocally {
+        didSet {
+            persistRuntimeSettings()
+        }
+    }
     var sessionRetentionLimit = SessionPersistenceSettings.default.retentionLimit {
         didSet {
             if sessionRetentionLimit < 1 {
@@ -54,9 +66,21 @@ final class AppModel {
             persistPanelViewPreferences()
         }
     }
-    var languageCode = "es"
-    var transcriptionModel = "gpt-4o-mini-transcribe"
-    var coachModel = "gpt-4o-mini"
+    var languageCode = RuntimeSettingsPreferences.default.languageCode {
+        didSet {
+            persistRuntimeSettings()
+        }
+    }
+    var transcriptionModel = RuntimeSettingsPreferences.default.transcriptionModel {
+        didSet {
+            persistRuntimeSettings()
+        }
+    }
+    var coachModel = RuntimeSettingsPreferences.default.coachModel {
+        didSet {
+            persistRuntimeSettings()
+        }
+    }
 
     var contextCard = ContextCard()
 
@@ -77,6 +101,7 @@ final class AppModel {
     private let sessionStore: any SessionPersisting
     private let telemetryStore: any TelemetryPersisting
     private let persistenceSettingsStore: any SessionPersistenceSettingsStoring
+    private let runtimeSettingsStore: any RuntimeSettingsStoring
     private let panelViewPreferencesStore: any PanelViewPreferencesStoring
     private let fileOpener: any FileOpening
     private var lastPersistedFingerprint: String?
@@ -88,13 +113,16 @@ final class AppModel {
         telemetryStore: (any TelemetryPersisting)? = nil,
         fileOpener: any FileOpening = WorkspaceFileOpener(),
         persistenceSettingsStore: any SessionPersistenceSettingsStoring = UserDefaultsSessionPersistenceSettingsStore(),
+        runtimeSettingsStore: any RuntimeSettingsStoring = UserDefaultsRuntimeSettingsStore(),
         panelViewPreferencesStore: any PanelViewPreferencesStoring = UserDefaultsPanelViewPreferencesStore()
     ) {
         self.persistenceSettingsStore = persistenceSettingsStore
+        self.runtimeSettingsStore = runtimeSettingsStore
         self.panelViewPreferencesStore = panelViewPreferencesStore
         self.fileOpener = fileOpener
 
         let persistenceSettings = persistenceSettingsStore.load()
+        let runtimeSettingsPreferences = runtimeSettingsStore.load()
         let panelViewPreferences = panelViewPreferencesStore.load()
         let customSessionsDirectoryURL = persistenceSettings.customDirectoryPath.map {
             URL(fileURLWithPath: $0, isDirectory: true)
@@ -103,6 +131,12 @@ final class AppModel {
         self.customSessionsDirectoryURL = customSessionsDirectoryURL
         usesDefaultSessionsDirectory = customSessionsDirectoryURL == nil
         customSessionsDirectoryPath = customSessionsDirectoryURL?.path ?? ""
+        sendAudioToOpenAI = runtimeSettingsPreferences.sendAudioToOpenAI
+        lowCostMode = runtimeSettingsPreferences.lowCostMode
+        persistSessionsLocally = runtimeSettingsPreferences.persistSessionsLocally
+        languageCode = runtimeSettingsPreferences.languageCode
+        transcriptionModel = runtimeSettingsPreferences.transcriptionModel
+        coachModel = runtimeSettingsPreferences.coachModel
         panelCompactMode = panelViewPreferences.isCompactMode
         panelTranscriptExpanded = panelViewPreferences.isTranscriptExpanded
         panelCoachExpanded = panelViewPreferences.isCoachExpanded
@@ -537,6 +571,19 @@ final class AppModel {
     private func applyTelemetrySnapshot(_ snapshot: LocalTelemetrySnapshot) {
         telemetrySessionCount = snapshot.sessionCount
         telemetryAverageProcessingSeconds = snapshot.averageProcessingSeconds
+    }
+
+    private func persistRuntimeSettings() {
+        runtimeSettingsStore.save(
+            RuntimeSettingsPreferences(
+                sendAudioToOpenAI: sendAudioToOpenAI,
+                lowCostMode: lowCostMode,
+                persistSessionsLocally: persistSessionsLocally,
+                languageCode: languageCode,
+                transcriptionModel: transcriptionModel,
+                coachModel: coachModel
+            )
+        )
     }
 
     private func persistPanelViewPreferences() {

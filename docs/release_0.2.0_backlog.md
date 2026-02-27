@@ -173,9 +173,15 @@ Se considera listo para `0.2.0` cuando todos los items `P0` estan en `✅`.
 - `✅` `P12.1` Arranque de nuevo ciclo post-P11:
   - dejar rama de continuidad creada desde `develop` post-merge de `P11`.
   - actualizar tracking inicial para preparar el siguiente bloque funcional.
-- `🚧` `P12.2` Definicion del siguiente incremento funcional:
+- `✅` `P12.2` Definicion del siguiente incremento funcional:
   - concretar el alcance ejecutable del ciclo P12.
   - priorizar tareas implementables para el siguiente tramo.
+- `✅` `P12.3` Persistencia de configuracion operativa:
+  - guardar y restaurar automaticamente idioma, modelos y toggles de practica entre aperturas.
+  - validar cobertura de tests para serializacion de configuracion runtime.
+- `🚧` `P12.4` Operativa de cierre del ciclo P12:
+  - validar estado remoto de la PR de continuidad tras cambios P12.
+  - consolidar merge del ciclo cuando plataforma este en estado limpio.
 
 ## Riesgos abiertos
 - Coste y latencia dependen del tamano del audio importado y del modelo configurado.
