@@ -247,6 +247,34 @@ final class AppModelPersistenceTests: XCTestCase {
     }
 
     @MainActor
+    func testInit_appliesStoredRuntimeSettingsPreferences() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let runtimeSettingsSpy = RuntimeSettingsStoreSpy(
+            loadedPreferences: RuntimeSettingsPreferences(
+                sendAudioToOpenAI: true,
+                lowCostMode: true,
+                persistSessionsLocally: true,
+                languageCode: "en",
+                transcriptionModel: "gpt-4o-transcribe",
+                coachModel: "gpt-4.1-mini"
+            )
+        )
+        let model = AppModel(
+            sessionStore: storeSpy,
+            telemetryStore: telemetrySpy,
+            runtimeSettingsStore: runtimeSettingsSpy
+        )
+
+        XCTAssertTrue(model.sendAudioToOpenAI)
+        XCTAssertTrue(model.lowCostMode)
+        XCTAssertTrue(model.persistSessionsLocally)
+        XCTAssertEqual(model.languageCode, "en")
+        XCTAssertEqual(model.transcriptionModel, "gpt-4o-transcribe")
+        XCTAssertEqual(model.coachModel, "gpt-4.1-mini")
+    }
+
+    @MainActor
     func testPanelViewPreferences_changesPersistIntoStore() {
         let storeSpy = SessionStoreSpy()
         let telemetrySpy = TelemetryStoreSpy()
@@ -267,6 +295,37 @@ final class AppModelPersistenceTests: XCTestCase {
                 isCompactMode: true,
                 isTranscriptExpanded: true,
                 isCoachExpanded: true
+            )
+        )
+    }
+
+    @MainActor
+    func testRuntimeSettingsPreferences_changesPersistIntoStore() {
+        let storeSpy = SessionStoreSpy()
+        let telemetrySpy = TelemetryStoreSpy()
+        let runtimeSettingsSpy = RuntimeSettingsStoreSpy()
+        let model = AppModel(
+            sessionStore: storeSpy,
+            telemetryStore: telemetrySpy,
+            runtimeSettingsStore: runtimeSettingsSpy
+        )
+
+        model.sendAudioToOpenAI = true
+        model.lowCostMode = true
+        model.persistSessionsLocally = true
+        model.languageCode = "en"
+        model.transcriptionModel = "gpt-4o-transcribe"
+        model.coachModel = "gpt-4.1-mini"
+
+        XCTAssertEqual(
+            runtimeSettingsSpy.savedPreferences.last,
+            RuntimeSettingsPreferences(
+                sendAudioToOpenAI: true,
+                lowCostMode: true,
+                persistSessionsLocally: true,
+                languageCode: "en",
+                transcriptionModel: "gpt-4o-transcribe",
+                coachModel: "gpt-4.1-mini"
             )
         )
     }
@@ -488,6 +547,23 @@ private final class PanelViewPreferencesStoreSpy: PanelViewPreferencesStoring {
     }
 
     func save(_ preferences: PanelViewPreferences) {
+        savedPreferences.append(preferences)
+    }
+}
+
+private final class RuntimeSettingsStoreSpy: RuntimeSettingsStoring {
+    private(set) var savedPreferences: [RuntimeSettingsPreferences] = []
+    private let loadedPreferences: RuntimeSettingsPreferences
+
+    init(loadedPreferences: RuntimeSettingsPreferences = .default) {
+        self.loadedPreferences = loadedPreferences
+    }
+
+    func load() -> RuntimeSettingsPreferences {
+        loadedPreferences
+    }
+
+    func save(_ preferences: RuntimeSettingsPreferences) {
         savedPreferences.append(preferences)
     }
 }
