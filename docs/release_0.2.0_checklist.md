@@ -523,5 +523,21 @@ Ultima actualizacion: 2026-02-26
   - comando: `swift test`
   - resultado: `60 tests, 0 failures`.
 
+## 40) Operativa de cierre del ciclo P12 (P12.4)
+- `✅` Validacion remota previa al merge:
+  - comando: `bash scripts/release_pr_monitor.sh 8`
+  - resultado final de premerge: `PR #8 OPEN`, `merge_state_status=CLEAN`, `action_required=false`.
+- `✅` Cierre en plataforma:
+  - comando ejecutado: `gh pr merge 8 --merge`
+  - PR: `https://github.com/SwiftEnProfundidad/FinalRoundLite/pull/8`
+  - estado: `MERGED`
+  - merged_at: `2026-02-27T00:37:15Z`
+  - merge_commit: `0460d012a05a3b80447942d14d014be1d464dd01`
+- `✅` Sincronizacion final de base:
+  - comandos ejecutados:
+    - `git checkout develop`
+    - `git pull --ff-only origin develop`
+  - resultado: `develop` alineada al cierre de `P12`.
+
 ## Estado actual
-- `P12.3` completado; `P12.4` en construccion para cierre operativo del ciclo P12.
+- `✅` Plan actual completado sin tasks pendientes.

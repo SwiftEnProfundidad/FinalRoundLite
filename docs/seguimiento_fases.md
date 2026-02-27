@@ -99,4 +99,5 @@ Regla: solo puede existir una tarea en `🚧 En construccion`.
 - `✅` Implementar `P12.1` arranque de nuevo ciclo post-P11 (rama de continuidad + tracking inicial).
 - `✅` Implementar `P12.2` definicion del siguiente incremento funcional del ciclo P12.
 - `✅` Implementar `P12.3` persistencia de configuracion operativa (idioma/modelos/toggles).
-- `🚧` Implementar `P12.4` operativa de cierre del ciclo P12 (estado remoto + merge).
+- `✅` Implementar `P12.4` operativa de cierre del ciclo P12 (estado remoto + merge).
+- `✅` Cierre final del plan actual sin tareas pendientes.
